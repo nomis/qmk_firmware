@@ -143,3 +143,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     return true;
 }
 
+uint32_t layer_state_set_user(uint32_t state) {
+    static uint32_t prev_state = _BASE;
+
+    if (layer_state_cmp(state, _NUM) != layer_state_cmp(prev_state, _NUM)) {
+        writePin(LED_MR_LOCK_PIN, !layer_state_cmp(state, _NUM));
+    }
+
+    return prev_state = state;
+}
