@@ -18,7 +18,6 @@
 // Layer shorthand
 enum __layer {
     L_BASE,
-    L_BREAK,
     L_FUNC,
     L_NUM,
 };
@@ -27,13 +26,14 @@ static bool win_key_locked = false;
 
 // Defines the keycodes used by our macros in process_record_user
 enum custom_keycodes {
-    KC_TGUI = SAFE_RANGE   // Toggle between GUI Lock or Unlock
+    CK_TGUI = SAFE_RANGE,   // Toggle between GUI Lock or Unlock
+    CK_PAUS,                // KC_MPLY (or KC_PAUS when modifiers held)
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   /* Keymap L_BASE: Base Layer (Default Layer)
    * ,-----------------------------------------------------------.  ,--------------.
-   * |Esc  |f1| f2| f3| f4|  | f5| f6| f7| f8|   | f9|f10|f11|f12|  |Prnt|ScLk|Play|
+   * |Esc  |f1| f2| f3| f4|  | f5| f6| f7| f8|   | f9|f10|f11|f12|  |Prnt|ScLk|Paus|
    * |-----------------------------------------------------------|  |--------------|
    * | ` | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |  0| - | = |Backsp |  | Ins|Home|PgUp|
    * |-----------------------------------------------------------|  |--------------|
@@ -47,35 +47,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * `-----------------------------------------------------------'  `--------------'
    */
   [L_BASE] = LAYOUT_tkl_iso( /* Base Layer */
-      KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,             KC_PSCR,  KC_SLCK,  KC_MPLY,
+      KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,             KC_PSCR,  KC_SLCK,  CK_PAUS,
       KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,   KC_BSPC,  KC_INS,   KC_HOME,  KC_PGUP,
       KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,            KC_DEL,   KC_END,   KC_PGDN,
       KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,  KC_NUHS,  KC_ENT,
-      LM(L_BREAK,MOD_LSFT),KC_NUBS, KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,            LM(L_BREAK,MOD_RSFT), KC_UP,
-      LM(L_BREAK,MOD_LCTL),LM(L_BREAK,MOD_LGUI),LM(L_BREAK,MOD_LALT),KC_SPC,LM(L_BREAK,MOD_RALT),LM(L_BREAK,MOD_RGUI),MO(L_FUNC),LM(L_BREAK,MOD_RCTL),KC_LEFT,KC_DOWN,KC_RGHT
-  ),
-  /* Keymap L_BREAK: Break Layer
-   * ,-----------------------------------------------------------.  ,--------------.
-   * |     |  |   |   |   |  |   |   |   |   |   |   |   |   |   |  |    |    |Paus|
-   * |-----------------------------------------------------------|  |--------------|
-   * |   |   |   |   |   |   |   |   |   |   |   |   |   |       |  |    |    |    |
-   * |-----------------------------------------------------------|  |--------------|
-   * |     |   |   |   |   |   |   |   |   |   |   |   |   |     |  |    |    |    |
-   * |------------------------------------------------------.    |  `--------------'
-   * |      |   |   |   |   |   |   |   |   |   |   |   |   |    |
-   * |-----------------------------------------------------------|       ,----.
-   * |    |   |   |   |   |   |   |   |   |   |   |   |          |       |    |
-   * |-----------------------------------------------------------|  ,--------------.
-   * |    |    |    |                       |    |     |Func|    |  |    |    |    |
-   * `-----------------------------------------------------------'  `--------------'
-   */
-  [L_BREAK] = LAYOUT_tkl_iso( /* Break Layer */
-      _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______,  KC_PAUS,
-      _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-      _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______,  _______,
-      _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-      _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,            _______,
-      _______,  _______,  _______,                                _______,                                _______,  _______,  _______,  _______,  _______,  _______,  _______
+      KC_LSFT,  KC_NUBS,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,            KC_RSFT,            KC_UP,
+      KC_LCTL,  KC_LGUI,  KC_LALT,                                KC_SPC,                       KC_RALT,  KC_RGUI,  MO(L_FUNC),KC_RCTL, KC_LEFT,  KC_DOWN,  KC_RGHT
   ),
   /* Keymap L_FUNC: Function Layer
    * ,-----------------------------------------------------------.  ,--------------.
@@ -93,12 +70,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * `-----------------------------------------------------------'  `--------------'
    */
   [L_FUNC] = LAYOUT_tkl_iso( /* Function Layer */
-      RESET,    KC_MPLY,  KC_MSTP,  KC_MRWD,  KC_MFFD,  KC_MUTE,  KC_VOLD,  KC_VOLU,  _______,  _______,  _______,  _______,  _______,            _______,  _______,  KC_PAUS,
+      RESET,    KC_MPLY,  KC_MSTP,  KC_MRWD,  KC_MFFD,  KC_MUTE,  KC_VOLD,  KC_VOLU,  _______,  _______,  _______,  _______,  _______,            _______,  _______,  _______,
       _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  KC_MSEL,  _______,
       _______,  _______,  _______,  KC_MAIL,  _______,  _______,  _______,  _______,  _______,  _______,  KC_PWR,   _______,  _______,            _______,  KC_MUTE,  _______,
       _______,  _______,  KC_SLEP,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  TG(L_NUM), _______,
       _______,  _______,  _______,  _______,  KC_CALC,  _______,  _______,  KC_NLCK,  _______,  _______,  _______,  _______,            _______,            KC_VOLU,
-      _______,  KC_TGUI,  _______,                                _______,                                _______,  KC_APP,   _______,  _______,  KC_MRWD,  KC_VOLD,  KC_MFFD
+      _______,  CK_TGUI,  _______,                                _______,                                _______,  KC_APP,   _______,  _______,  KC_MRWD,  KC_VOLD,  KC_MFFD
   ),
   /* Keymap L_NUM: Numeric Keypad Layer
    * ,-----------------------------------------------------------.  ,--------------.
@@ -151,8 +128,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    action_t action;
+
     switch (keycode) {
-        case KC_TGUI:
+        case CK_TGUI:
             if (!record->event.pressed) {
                 // Toggle GUI lock on key release
                 win_key_locked = !win_key_locked;
@@ -163,6 +142,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case KC_RGUI:
             if (win_key_locked) { return false; }
             break;
+
+        case CK_PAUS:
+            if (get_mods() & MOD_MASK_CSAG) {
+                action.code = ACTION_KEY(KC_PAUS);
+            } else {
+                action.code = ACTION_KEY(KC_MPLY);
+            }
+            process_action(record, action);
+            return false;
     }
     return true;
 }
