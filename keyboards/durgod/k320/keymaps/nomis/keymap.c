@@ -16,10 +16,10 @@
 #include QMK_KEYBOARD_H
 
 // Layer shorthand
-enum _layer {
-    _BASE,
-    _FUNC,
-    _NUM,
+enum __layer {
+    L_BASE,
+    L_FUNC,
+    L_NUM,
 };
 
 static bool win_key_locked = false;
@@ -30,7 +30,7 @@ enum custom_keycodes {
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-  /* Keymap _BASE: Base Layer (Default Layer)
+  /* Keymap L_BASE: Base Layer (Default Layer)
    * ,-----------------------------------------------------------.  ,--------------.
    * |Esc  |f1| f2| f3| f4|  | f5| f6| f7| f8|   | f9|f10|f11|f12|  |Prnt|ScLk|Play|
    * |-----------------------------------------------------------|  |--------------|
@@ -45,7 +45,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * |Ctrl|Gui |Alt |      Space            |Alt |Gui  |Func|Ctrl|  |Left| Dn |Rght|
    * `-----------------------------------------------------------'  `--------------'
    */
-  [_BASE] = LAYOUT_tkl_iso( /* Base Layer */
+  [L_BASE] = LAYOUT_tkl_iso( /* Base Layer */
       KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,             KC_PSCR,  KC_SLCK,  KC_MPLY,
       KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,   KC_BSPC,  KC_INS,   KC_HOME,  KC_PGUP,
       KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,            KC_DEL,   KC_END,   KC_PGDN,
@@ -53,7 +53,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       KC_LSFT,  KC_NUBS,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,            KC_RSFT,            KC_UP,
       KC_LCTL,  KC_LGUI,  KC_LALT,                                KC_SPC,                                 KC_RALT,  KC_RGUI, MO(_FUNC), KC_RCTL,  KC_LEFT,  KC_DOWN,  KC_RGHT
   ),
-  /* Keymap _FUNC: Function Layer
+  /* Keymap L_FUNC: Function Layer
    * ,-----------------------------------------------------------.  ,--------------.
    * |!!!|Play|Stop|Prev|Next| |Mute|Vol+|Vol-|    | |  |  |  |  |  |    |    |Paus|
    * |-----------------------------------------------------------|  |--------------|
@@ -68,15 +68,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * |    |Lock|    |                       |    |App  |Func|    |  |Prev|Vol-|Next|
    * `-----------------------------------------------------------'  `--------------'
    */
-  [_FUNC] = LAYOUT_tkl_iso( /* Function Layer */
+  [L_FUNC] = LAYOUT_tkl_iso( /* Function Layer */
       RESET,    KC_MPLY,  KC_MSTP,  KC_MRWD,  KC_MFFD,  KC_MUTE,  KC_VOLD,  KC_VOLU,  _______,  _______,  _______,  _______,  _______,            _______,  _______,  KC_PAUS,
       _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  KC_MSEL,  _______,
       _______,  _______,  _______,  KC_MAIL,  _______,  _______,  _______,  _______,  _______,  _______,  KC_PWR,   _______,  _______,            _______,  KC_MUTE,  _______,
-      _______,  _______,  KC_SLEP,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  TG(_NUM), _______,
+      _______,  _______,  KC_SLEP,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  TG(L_NUM), _______,
       _______,  _______,  _______,  _______,  KC_CALC,  _______,  _______,  KC_NLCK,  _______,  _______,  _______,  _______,            _______,            KC_VOLU,
       _______,  KC_TGUI,  _______,                                _______,                                _______,  KC_APP,   _______,  _______,  KC_MRWD,  KC_VOLD,  KC_MFFD
   ),
-  /* Keymap _NUM: Numeric Keypad Layer
+  /* Keymap L_NUM: Numeric Keypad Layer
    * ,-----------------------------------------------------------.  ,--------------.
    * |     |  |   |   |   |  |   |   |   |   |   |   |   |   |   |  | 7  | 8  | 9  |
    * |-----------------------------------------------------------|  |--------------|
@@ -91,7 +91,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * |    |    |    |                       |    |     |Func|    |  |    | .  |    |
    * `-----------------------------------------------------------'  `--------------'
    */
-  [_NUM] = LAYOUT_tkl_iso( /* Numeric Keypad Layer */
+  [L_NUM] = LAYOUT_tkl_iso( /* Numeric Keypad Layer */
       _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            KC_7,     KC_8,     KC_9,
       _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  KC_PAST,  _______,  _______,  KC_PMNS,  KC_PPLS,  _______,  KC_4,     KC_5,     KC_6,
       _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            KC_1,     KC_2,     KC_3,
@@ -100,7 +100,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       _______,  _______,  _______,                                _______,                                _______,  _______,  _______,  _______,  _______,  KC_DOT,   _______
   ),
 #if 0
-  /* Keymap _EMPTY: Empty Layer
+  /* Keymap L_EMPTY: Empty Layer
    * ,-----------------------------------------------------------.  ,--------------.
    * |     |  |   |   |   |  |   |   |   |   |   |   |   |   |   |  |    |    |    |
    * |-----------------------------------------------------------|  |--------------|
@@ -115,7 +115,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * |    |    |    |                       |    |     |Func|    |  |    |    |    |
    * `-----------------------------------------------------------'  `--------------'
    */
-  [_EMPTY] = LAYOUT_tkl_iso( /* Empty Layer */
+  [L_EMPTY] = LAYOUT_tkl_iso( /* Empty Layer */
       _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______,  _______,
       _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
       _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______,  _______,
@@ -144,10 +144,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 uint32_t layer_state_set_user(uint32_t state) {
-    static uint32_t prev_state = _BASE;
+    static uint32_t prev_state = L_BASE;
 
-    if (layer_state_cmp(state, _NUM) != layer_state_cmp(prev_state, _NUM)) {
-        writePin(LED_MR_LOCK_PIN, !layer_state_cmp(state, _NUM));
+    if (layer_state_cmp(state, L_NUM) != layer_state_cmp(prev_state, L_NUM)) {
+        writePin(LED_MR_LOCK_PIN, !layer_state_cmp(state, L_NUM));
     }
 
     return prev_state = state;
