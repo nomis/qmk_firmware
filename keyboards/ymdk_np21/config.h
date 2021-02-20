@@ -47,7 +47,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DIODE_DIRECTION COL2ROW
 
 #define BACKLIGHT_PIN D4
-#define BACKLIGHT_LEVELS 12
+#define BACKLIGHT_LEVELS 31
+#define BACKLIGHT_LIMIT_VAL 63
 #define BACKLIGHT_BREATHING
 
 #define RGBLED_NUM 5

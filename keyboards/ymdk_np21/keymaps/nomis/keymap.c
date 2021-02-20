@@ -92,3 +92,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		_______,              RESET,     _______
 	),
 };
+
+uint32_t layer_state_set_user(uint32_t state) {
+	static uint32_t prev_state = L_BASE;
+
+	if (layer_state_cmp(state, L_REAL) != layer_state_cmp(prev_state, L_REAL)) {
+		backlight_set(layer_state_cmp(state, L_REAL) ? 1 : 0);
+	}
+
+	return prev_state = state;
+}
