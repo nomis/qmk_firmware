@@ -126,6 +126,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+	static uint16_t paus_keycode = KC_NO;
 	action_t action;
 
 	switch (keycode) {
@@ -142,11 +143,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 			break;
 
 		case CK_PAUS:
-			if (get_mods() & MOD_MASK_CSAG) {
-				action.code = ACTION_KEY(KC_PAUS);
-			} else {
-				action.code = ACTION_KEY(KC_MPLY);
+			if (record->event.pressed) {
+				if (get_mods() & MOD_MASK_CSAG) {
+					paus_keycode = KC_PAUS;
+				} else {
+					paus_keycode = KC_MPLY;
+				}
 			}
+
+			action.code = ACTION_KEY(paus_keycode);
 			process_action(record, action);
 			return false;
 	}
