@@ -1,3 +1,6 @@
+# Default to K320 variant
+DEFAULT_FOLDER=durgod/k3x0/k320
+
 # MCU name
 # Actually F070, but close enough
 MCU = STM32F072
@@ -24,4 +27,4 @@ RGBLIGHT_ENABLE = no        # Enable keyboard RGB underglow
 BLUETOOTH_ENABLE = no       # Enable Bluetooth
 AUDIO_ENABLE = no           # Audio output
 
-LAYOUTS = fullsize_ansi fullsize_iso
+LAYOUTS = fullsize_ansi fullsize_iso tkl_ansi tkl_iso

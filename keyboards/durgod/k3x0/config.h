@@ -18,13 +18,6 @@
 
 #include "config_common.h"
 
-/* USB Device descriptor parameter */
-#define VENDOR_ID       0xD60D
-#define PRODUCT_ID      0x3000
-#define DEVICE_VER      0x0001
-#define MANUFACTURER    Hoksi Technology
-#define PRODUCT         DURGOD Taurus K3X0 (QMK)
-
 /* key matrix size */
 #define MATRIX_ROWS 8
 #define MATRIX_COLS 16
