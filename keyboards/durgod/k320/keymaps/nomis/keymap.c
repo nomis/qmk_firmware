@@ -15,6 +15,8 @@
  */
 #include QMK_KEYBOARD_H
 
+#include <stdio.h>
+
 enum my_layers {
 	L_BASE,
 	L_FUNC,
@@ -26,6 +28,7 @@ static bool win_key_locked = false;
 enum custom_keycodes {
 	CK_TGUI = SAFE_RANGE,   // Toggle between GUI Lock or Unlock
 	CK_PAUS,                // KC_MPLY (or KC_PAUS when modifiers held)
+	CK_RATE,
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -68,7 +71,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * `-----------------------------------------------------------'  `--------------'
 	 */
 	[L_FUNC] = LAYOUT_tkl_iso(
-		RESET,    _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______,  KC_PAUS,
+		RESET,    CK_RATE,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______,  KC_PAUS,
 		_______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  KC_MSEL,  KC_VOLU,
 		_______,  _______,  KC_WAKE,  KC_MAIL,  _______,  _______,  _______,  _______,  _______,  _______,  KC_PWR,   _______,  _______,            _______,  KC_MUTE,  KC_VOLD,
 		_______,  _______,  KC_SLEP,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  TG(L_NUM), _______,
@@ -153,6 +156,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 			action.code = ACTION_KEY(paus_keycode);
 			process_action(record, action);
+			return false;
+
+		case CK_RATE:
+			if (record->event.pressed) {
+				char scan_rate[15];
+				snprintf(scan_rate, sizeof(scan_rate), "%lu", get_matrix_scan_rate());
+				send_string(scan_rate);
+				SEND_STRING(SS_TAP(X_ENTER));
+			}
 			return false;
 	}
 	return true;
