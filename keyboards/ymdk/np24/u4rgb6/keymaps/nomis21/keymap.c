@@ -99,8 +99,91 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	),
 };
 
+#define BRIGHTNESS 128
+static const HSV red = { 0, 255, BRIGHTNESS };
+static const HSV orange = { 10, 255, BRIGHTNESS };
+static const HSV green = { 85, 255, BRIGHTNESS };
+static const HSV blue = { 170, 255, BRIGHTNESS };
+static const HSV cyan = { 128, 255, BRIGHTNESS };
+static const HSV white = { 0, 0, BRIGHTNESS };
+static const HSV black = { HSV_BLACK };
+
+static void led_sethsv(HSV hsv) {
+	rgblight_sethsv_noeeprom(hsv.h, hsv.s, hsv.v);
+}
+
+static bool led_hsv_eq(HSV hsv1, HSV hsv2) {
+	return hsv1.h == hsv2.h
+		&& hsv1.s == hsv2.s
+		&& hsv1.v == hsv2.v;
+}
+
+static bool num_lock = false;
+static bool real_layer = false;
+static void update_leds(void) {
+	if (real_layer) {
+		if (num_lock) {
+			led_sethsv(orange);
+		} else {
+			led_sethsv(red);
+		}
+	} else {
+		if (num_lock) {
+			led_sethsv(green);
+		} else {
+			led_sethsv(black);
+		}
+	}
+}
+
+void keyboard_post_init_user(void) {
+	if (!rgblight_is_enabled() || rgblight_get_mode() != RGBLIGHT_MODE_STATIC_LIGHT || !led_hsv_eq(rgblight_get_hsv(), black)) {
+		rgblight_enable_noeeprom();
+		rgblight_mode_noeeprom(RGBLIGHT_MODE_STATIC_LIGHT);
+		rgblight_sethsv(HSV_BLACK);
+		led_sethsv(cyan);
+		wait_ms(1000);
+	}
+
+	if (is_backlight_enabled()) {
+		backlight_disable();
+		eeconfig_update_backlight_current();
+		led_sethsv(cyan);
+		wait_ms(1000);
+	}
+
+	led_sethsv(white);
+	wait_ms(500);
+
+	num_lock = host_keyboard_led_state().num_lock;
+	real_layer = layer_state_is(L_REAL);
+	update_leds();
+}
+
+bool led_update_user(led_t led_state) {
+	if (num_lock != led_state.num_lock) {
+		num_lock = led_state.num_lock;
+		update_leds();
+	}
+
+	return true;
+}
+
+uint32_t layer_state_set_user(uint32_t state) {
+	if (real_layer != layer_state_cmp(state, L_REAL)) {
+		real_layer = layer_state_cmp(state, L_REAL);
+		update_leds();
+	}
+
+	return state;
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 	switch (keycode) {
+		case RESET:
+			led_sethsv(blue);
+			break;
+
 		case CK_RATE:
 			if (record->event.pressed) {
 				char scan_rate[15];
@@ -111,14 +194,4 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 			return false;
 	}
 	return true;
-}
-
-uint32_t layer_state_set_user(uint32_t state) {
-	static uint32_t prev_state = L_BASE;
-
-	if (layer_state_cmp(state, L_REAL) != layer_state_cmp(prev_state, L_REAL)) {
-		backlight_set(layer_state_cmp(state, L_REAL) ? 1 : 0);
-	}
-
-	return prev_state = state;
 }
