@@ -15,10 +15,16 @@
  */
 #include QMK_KEYBOARD_H
 
+#include <stdio.h>
+
 enum my_layers {
 	L_BASE,
 	L_REAL,
 	L_FUNC,
+};
+
+enum custom_keycodes {
+	CK_RATE = SAFE_RANGE,
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -89,9 +95,23 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		_______,   _______,   _______,
 		_______,   _______,   _______,   _______,
 		_______,   _______,   _______,
-		_______,              RESET,     _______
+		_______,              RESET,     CK_RATE
 	),
 };
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+	switch (keycode) {
+		case CK_RATE:
+			if (record->event.pressed) {
+				char scan_rate[15];
+				snprintf(scan_rate, sizeof(scan_rate), "%lu", get_matrix_scan_rate());
+				send_string(scan_rate);
+				SEND_STRING(SS_TAP(X_ENTER));
+			}
+			return false;
+	}
+	return true;
+}
 
 uint32_t layer_state_set_user(uint32_t state) {
 	static uint32_t prev_state = L_BASE;
