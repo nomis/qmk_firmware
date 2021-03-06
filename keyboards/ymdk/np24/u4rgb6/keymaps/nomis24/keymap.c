@@ -79,20 +79,20 @@ const uint32_t PROGMEM unicode_map[] = {
 		1F621, 😡,  2639, ☹️, 1F62B, 😫,
 		1F631, 😱, 1F623, 😣, 1F92E, 🤮),
 	MAKE_EMOJI(5,
-		1F920, 🤠, 1F44D, 👍, 1F4A9, 💩,
+		1F920, 🤠, 1F44D, 👍, 1F60B, 😋,
 		1F937, 🤷, 1F926, 🤦, 1F481, 💁,
 		1F921, 🤡, 1F44E, 👎, 1F624, 😤),
 	MAKE_EMOJI(6,
-		00000, XX, 00000, XX, 00000, XX,
+		 2622, ☢️, 1F389, 🎉,  2623, ☣️,
 		1F648, 🙈, 1F649, 🙉, 1F64A, 🙊,
-		00000, XX, 00000, XX, 00000, XX),
+		1F382, 🎂, 1F38A, 🎊, 00000, XX),
 	MAKE_EMOJI(7,
 		1F1EC, 🇬🇧, 1F3F4, 🏴󠁧󠁢󠁳󠁣󠁴󠁿, 1F1EA, 🇪🇺,
 		1F3F4, 🏴‍☠️, 1F3F3, 🏳️‍🌈, 1F3F3, 🏳️‍⚧️,
 		1F1FA, 🇺🇳, 1F1E6, 🇦🇺, 1F1F3, 🇳🇿),
 	MAKE_EMOJI(8,
 		 2196, ↖️,  2B06, ⬆️,  2197, ↗️,
-		 2B05, ⬅️,1F9D1,covfefe,27A1,➡️,
+		 2B05, ⬅️, 1F4A9, 💩,  27A1, ➡️,
 		 2199, ↙️,  2B07, ⬇️,  2198, ↘️),
 };
 
@@ -622,13 +622,11 @@ void post_process_record_user(uint16_t keycode, keyrecord_t *record) {
 		if (record->event.pressed) {
 		switch (keycode) {
 		case E_M(4): // ☹️
+		case E_TL(6): // ☢️
+		case E_TR(6): // ☣️
 		case E_TL(8) ... E_L(8): // ↖️⬆️↗️⬅️
 		case E_R(8) ... E_BR(8): // ➡️↙️⬇️↘️
 			send_unicode_hex_string("FE0F");
-			break;
-
-		case E_M(8): // 🧑👩👨📹📺
-			send_unicode_hex_string("1F469 1F468 1F4F9 1F4FA");
 			break;
 
 		case E_TL(7): // 🇬🇧
