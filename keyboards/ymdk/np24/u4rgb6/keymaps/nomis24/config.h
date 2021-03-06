@@ -5,3 +5,5 @@
 
 #define VENDOR_ID      0x1209
 #define PRODUCT_ID     0x0003
+
+#define UNICODE_SELECTED_MODES UC_LNX
