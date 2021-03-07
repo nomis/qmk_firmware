@@ -26,10 +26,12 @@ enum my_layers {
 	L_BOTTOM_LEFT,
 	L_BOTTOM_RIGHT,
 	L_BLOCK,
+	L_ALT_CLIPBOARD,
 };
 
 enum custom_keycodes {
 	CK_OS = SAFE_RANGE,
+	CK_CLIP,
 };
 
 enum unicode_names {
@@ -113,9 +115,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * |        |        |        |        |
 	 * |        |        |        |        |
 	 * |-----------------------------------|
-	 * |        |        |        |        |
-	 * |        |   Cut  |  Copy  | Paste  |
-	 * |        |        |        |        |
+	 * | Toggle |        |        |        |
+	 * |Alt Clip|  Cut   |  Copy  | Paste  |
+	 * | Layer  |  C-x   |  C-c   | C-v    |
 	 * |-----------------------------------|
 	 * |  Teams |  Teams |  Zoom  |  Zoom  |
 	 * | Toggle | Toggle | Toggle | Toggle |
@@ -127,7 +129,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		E_M(1),                    E_M(2),                E_M(3),                E_M(4),
 		E_M(5),                    E_M(6),                E_M(7),                E_M(8),
 		KC_NO,                     KC_NO,                 KC_NO,                 KC_NO,
-		KC_NO,                     LCTL(KC_X),            LCTL(KC_C),            LCTL(KC_V),
+		CK_CLIP,                   LCTL(KC_X),            LCTL(KC_C),            LCTL(KC_V),
 		LCTL(LSFT(KC_M)),          LCTL(LSFT(KC_O)),      LALT(KC_V),            LALT(KC_A)
 	),
 	/* Keymap L_TOP: Stience
@@ -445,6 +447,41 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		_______,               _______,               _______,               _______,
 		_______,               _______,               _______,               _______
 	),
+	/* Keymap L_ALT_CLIPBOARD: Alt Clipboard Layer
+	 * ,-----------------------------------.
+	 * | Portal | Stience|   (λ)  | Portal |
+	 * |        |        |        |        |
+	 * | Orange |  Blue  | Orange |  Blue  |
+	 * |-----------------------------------|
+	 * |        |        |        |        |
+	 * |        |        |        |        |
+	 * |        |        |        |        |
+	 * |-----------------------------------|
+	 * |        |        |        |        |
+	 * |        |        |        |        |
+	 * |        |        |        |        |
+	 * |-----------------------------------|
+	 * |        |        |        |        |
+	 * |        |        |        |        |
+	 * |        |        |        |        |
+	 * |-----------------------------------|
+	 * | Toggle |        |        |        |
+	 * |Alt Clip|  Cut   |  Copy  | Paste  |
+	 * | Layer  |  S-Del |  C-Ins | S-Ins  |
+	 * |-----------------------------------|
+	 * |        |        |        |        |
+	 * |        |        |        |        |
+	 * |        |        |        |        |
+	 * `-----------------------------------'
+	 */
+	[L_ALT_CLIPBOARD] = LAYOUT_ortho_6x4(
+		_______,               _______,               _______,               _______,
+		_______,               _______,               _______,               _______,
+		_______,               _______,               _______,               _______,
+		_______,               _______,               _______,               _______,
+		_______,               LSFT(KC_DEL),          LCTL(KC_INS),          LSFT(KC_INS),
+		_______,               _______,               _______,               _______
+	),
 #if 0
 	/* Keymap L_EMPTY: Empty Layer
 	 * ,-----------------------------------.
@@ -639,10 +676,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 				break;
 			}
 			break;
+
+		case CK_CLIP:
+			if (layer_state_is(L_ALT_CLIPBOARD)) {
+				layer_off(L_ALT_CLIPBOARD);
+				led_sethsv(green);
+			} else {
+				layer_on(L_ALT_CLIPBOARD);
+				led_sethsv(red);
+			}
+			break;
 		}
 	} else {
 		switch (keycode) {
 		case CK_OS:
+		case CK_CLIP:
 			led_sethsv(black);
 			break;
 		}
