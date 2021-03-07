@@ -32,6 +32,7 @@ enum my_layers {
 enum custom_keycodes {
 	CK_OS = SAFE_RANGE,
 	CK_CLIP,
+	CK_PORTAL,
 };
 
 enum unicode_names {
@@ -170,7 +171,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	/* Keymap L_LEFT: Orange Portal
 	 * ,-----------------------------------.
 	 * | Portal |↖️      |   (λ)  |        |
-	 * |⬅️      | Stience| Orange |        |
+	 * |⬅️      | Stience| Orange | Portal |
 	 * | Orange |  Blue  |↙️      |        |
 	 * |-----------------------------------|
 	 * | Emoji  | Emoji  | Emoji  | Emoji  |
@@ -195,7 +196,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * `-----------------------------------'
 	 */
 	[L_LEFT] = LAYOUT_ortho_6x4(
-		_______,               _______,               _______,               _______,
+		_______,               _______,               _______,               CK_PORTAL,
 		E_L(1),                E_L(2),                E_L(3),                E_L(4),
 		E_L(5),                E_L(6),                E_L(7),                E_L(8),
 		_______,               _______,               _______,               _______,
@@ -205,7 +206,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	/* Keymap L_RIGHT: Blue Portal
 	 * ,-----------------------------------.
 	 * |        |      ↗️|   (λ)  | Portal |
-	 * |        | Stience| Orange |      ➡️|
+	 * | Portal | Stience| Orange |      ➡️|
 	 * |        |  Blue  |      ↘️|  Blue  |
 	 * |-----------------------------------|
 	 * | Emoji  | Emoji  | Emoji  | Emoji  |
@@ -230,7 +231,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * `-----------------------------------'
 	 */
 	[L_RIGHT] = LAYOUT_ortho_6x4(
-		_______,               _______,               _______,               _______,
+		CK_PORTAL,             _______,               _______,               _______,
 		E_R(1),                E_R(2),                E_R(3),                E_R(4),
 		E_R(5),                E_R(6),                E_R(7),                E_R(8),
 		_______,               _______,               _______,               _______,
