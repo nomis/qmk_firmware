@@ -681,10 +681,22 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 		case CK_CLIP:
 			if (layer_state_is(L_ALT_CLIPBOARD)) {
 				layer_off(L_ALT_CLIPBOARD);
-				led_sethsv(green);
+				led_sethsv_at(green, 0);
+				led_sethsv_at(black, 1);
+				led_sethsv_at(black, 2);
+				led_sethsv_at(black, 3);
+				led_sethsv_at(green, 4);
+				led_sethsv_at(green, 5);
+				rgblight_set();
 			} else {
 				layer_on(L_ALT_CLIPBOARD);
-				led_sethsv(red);
+				led_sethsv_at(black, 0);
+				led_sethsv_at(red, 1);
+				led_sethsv_at(red, 2);
+				led_sethsv_at(red, 3);
+				led_sethsv_at(black, 4);
+				led_sethsv_at(black, 5);
+				rgblight_set();
 			}
 			break;
 		}
