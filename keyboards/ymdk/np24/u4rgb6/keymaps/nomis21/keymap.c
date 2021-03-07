@@ -19,6 +19,7 @@
 
 enum my_layers {
 	L_BASE,
+	L_AUTO,
 	L_REAL,
 	L_FUNC,
 };
@@ -50,6 +51,29 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		KC_4,      KC_5,      KC_6,      KC_PPLS,
 		KC_1,      KC_2,      KC_3,
 		KC_0,                 KC_DOT,    KC_PENT
+	),
+	/* Keymap L_AUTO: Auto Keypad Layer
+	 * ,-------------------.
+	 * |    |    |    |    |
+	 * |-------------------|
+	 * |    |    |    |    |
+	 * |-------------------|
+	 * |  7 |  8 |  9 |    |
+	 * |--------------|    |
+	 * |  4 |  5 |  6 |    |
+	 * |-------------------|
+	 * |  1 |  2 |  3 |    |
+	 * |--------------|    |
+	 * |    0    |  . |    |
+	 * `-------------------'
+	 */
+	[L_AUTO] = LAYOUT_numpad_6x4(
+		_______,   _______,   _______,   _______,
+		_______,   _______,   _______,   _______,
+		KC_P7,     KC_P8,     KC_P9,
+		KC_P4,     KC_P5,     KC_P6,     _______,
+		KC_P1,     KC_P2,     KC_P3,
+		KC_P0,                KC_PDOT,   _______
 	),
 	/* Keymap L_REAL: Real Keypad Layer
 	 * ,-------------------.
@@ -136,6 +160,16 @@ static void update_leds(void) {
 	}
 }
 
+static void update_auto_layer(void) {
+	if (layer_state_is(L_AUTO) != num_lock) {
+		if (num_lock) {
+			layer_on(L_AUTO);
+		} else {
+			layer_off(L_AUTO);
+		}
+	}
+}
+
 void keyboard_post_init_user(void) {
 	if (!rgblight_is_enabled() || rgblight_get_mode() != RGBLIGHT_MODE_STATIC_LIGHT || !led_hsv_eq(rgblight_get_hsv(), black)) {
 		rgblight_enable_noeeprom();
@@ -157,12 +191,14 @@ void keyboard_post_init_user(void) {
 
 	num_lock = host_keyboard_led_state().num_lock;
 	real_layer = layer_state_is(L_REAL);
+	update_auto_layer();
 	update_leds();
 }
 
 bool led_update_user(led_t led_state) {
 	if (num_lock != led_state.num_lock) {
 		num_lock = led_state.num_lock;
+		update_auto_layer();
 		update_leds();
 	}
 
