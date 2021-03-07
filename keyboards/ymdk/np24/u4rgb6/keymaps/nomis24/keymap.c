@@ -29,8 +29,6 @@ enum my_layers {
 
 enum custom_keycodes {
 	CK_OS = SAFE_RANGE,
-	CK_RESET1,
-	CK_RESET2,
 };
 
 enum unicode_names {
@@ -159,7 +157,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * `-----------------------------------'
 	 */
 	[L_TOP] = LAYOUT_ortho_6x4(
-		MO(L_TOP_LEFT),        _______,               CK_OS,                 MO(L_TOP_RIGHT),
+		_______,               _______,               CK_OS,                 _______,
 		E_T(1),                E_T(2),                E_T(3),                E_T(4),
 		E_T(5),                E_T(6),                E_T(7),                E_T(8),
 		_______,               _______,               _______,               _______,
@@ -168,9 +166,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	),
 	/* Keymap L_LEFT: Orange Portal
 	 * ,-----------------------------------.
-	 * | Portal |↖️      |   (λ)  |XXXXXXXX|
-	 * |⬅️      | Stience| Orange |XXXXXXXX|
-	 * | Orange |  Blue  |↙️      |XXXXXXXX|
+	 * | Portal |↖️      |   (λ)  |        |
+	 * |⬅️      | Stience| Orange |        |
+	 * | Orange |  Blue  |↙️      |        |
 	 * |-----------------------------------|
 	 * | Emoji  | Emoji  | Emoji  | Emoji  |
 	 * |⬅️      |⬅️      |⬅️      |⬅️      |
@@ -194,7 +192,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * `-----------------------------------'
 	 */
 	[L_LEFT] = LAYOUT_ortho_6x4(
-		_______,               MO(L_TOP_LEFT),        MO(L_BOTTOM_LEFT),     XXXXXXX,
+		_______,               _______,               _______,               _______,
 		E_L(1),                E_L(2),                E_L(3),                E_L(4),
 		E_L(5),                E_L(6),                E_L(7),                E_L(8),
 		_______,               _______,               _______,               _______,
@@ -203,9 +201,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	),
 	/* Keymap L_RIGHT: Blue Portal
 	 * ,-----------------------------------.
-	 * |XXXXXXXX|      ↗️|   (λ)  | Portal |
-	 * |XXXXXXXX| Stience| Orange |      ➡️|
-	 * |XXXXXXXX|  Blue  |      ↘️|  Blue  |
+	 * |        |      ↗️|   (λ)  | Portal |
+	 * |        | Stience| Orange |      ➡️|
+	 * |        |  Blue  |      ↘️|  Blue  |
 	 * |-----------------------------------|
 	 * | Emoji  | Emoji  | Emoji  | Emoji  |
 	 * |      ➡️|      ➡️|      ➡️|      ➡️|
@@ -229,7 +227,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * `-----------------------------------'
 	 */
 	[L_RIGHT] = LAYOUT_ortho_6x4(
-		XXXXXXX,               MO(L_TOP_RIGHT),       MO(L_BOTTOM_RIGHT),    _______,
+		_______,               _______,               _______,               _______,
 		E_R(1),                E_R(2),                E_R(3),                E_R(4),
 		E_R(5),                E_R(6),                E_R(7),                E_R(8),
 		_______,               _______,               _______,               _______,
@@ -264,7 +262,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * `-----------------------------------'
 	 */
 	[L_BOTTOM] = LAYOUT_ortho_6x4(
-		MO(L_BOTTOM_LEFT),     CK_OS,                 _______,               MO(L_BOTTOM_RIGHT),
+		_______,               CK_OS,                 _______,               _______,
 		E_B(1),                E_B(2),                E_B(3),                E_B(4),
 		E_B(5),                E_B(6),                E_B(7),                E_B(8),
 		_______,               _______,               _______,               _______,
@@ -299,7 +297,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * `-----------------------------------'
 	 */
 	[L_TOP_LEFT] = LAYOUT_ortho_6x4(
-		_______,               _______,               CK_RESET1,             CK_RESET2,
+		_______,               _______,               MO(L_BOTTOM),          MO(L_RIGHT),
 		E_TL(1),               E_TL(2),               E_TL(3),               E_TL(4),
 		E_TL(5),               E_TL(6),               E_TL(7),               E_TL(8),
 		_______,               _______,               _______,               _______,
@@ -334,7 +332,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * `-----------------------------------'
 	 */
 	[L_TOP_RIGHT] = LAYOUT_ortho_6x4(
-		CK_RESET1,             _______,               CK_RESET2,             _______,
+		MO(L_LEFT),            _______,               MO(L_BOTTOM),          _______,
 		E_TR(1),               E_TR(2),               E_TR(3),               E_TR(4),
 		E_TR(5),               E_TR(6),               E_TR(7),               E_TR(8),
 		_______,               _______,               _______,               _______,
@@ -369,7 +367,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * `-----------------------------------'
 	 */
 	[L_BOTTOM_LEFT] = LAYOUT_ortho_6x4(
-		_______,               CK_RESET1,             _______,               CK_RESET2,
+		_______,               MO(L_TOP),             _______,               MO(L_RIGHT),
 		E_BL(1),               E_BL(2),               E_BL(3),               E_BL(4),
 		E_BL(5),               E_BL(6),               E_BL(7),               E_BL(8),
 		_______,               _______,               _______,               _______,
@@ -404,7 +402,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * `-----------------------------------'
 	 */
 	[L_BOTTOM_RIGHT] = LAYOUT_ortho_6x4(
-		CK_RESET1,             CK_RESET2,             _______,               _______,
+		MO(L_LEFT),            MO(L_TOP),             _______,               _______,
 		E_BR(1),               E_BR(2),               E_BR(3),               E_BR(4),
 		E_BR(5),               E_BR(6),               E_BR(7),               E_BR(8),
 		_______,               _______,               _______,               _______,
@@ -495,7 +493,24 @@ void keyboard_post_init_user(void) {
 }
 
 uint32_t layer_state_set_user(uint32_t state) {
-	if (layer_state_cmp(state, L_TOP_LEFT)) {
+	uint8_t layers = 0;
+
+	state = update_tri_layer_state(state, L_TOP, L_LEFT, L_TOP_LEFT);
+	state = update_tri_layer_state(state, L_TOP, L_RIGHT, L_TOP_RIGHT);
+	state = update_tri_layer_state(state, L_BOTTOM, L_LEFT, L_BOTTOM_LEFT);
+	state = update_tri_layer_state(state, L_BOTTOM, L_RIGHT, L_BOTTOM_RIGHT);
+
+	layers += layer_state_cmp(state, L_LEFT) ? 1 : 0;
+	layers += layer_state_cmp(state, L_TOP) ? 1 : 0;
+	layers += layer_state_cmp(state, L_BOTTOM) ? 1 : 0;
+	layers += layer_state_cmp(state, L_RIGHT) ? 1 : 0;
+
+	if (layers == 4) {
+		led_sethsv(green);
+		reset_keyboard();
+	} else if (layers == 3) {
+		led_sethsv(red);
+	} else if (layer_state_cmp(state, L_TOP_LEFT)) {
 		led_sethsv_at(red, 0);
 		led_sethsv_at(white, 1);
 		led_sethsv_at(black, 2);
@@ -567,9 +582,6 @@ uint32_t layer_state_set_user(uint32_t state) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-	static uint8_t reset1 = 0;
-	static uint8_t reset2 = 0;
-
 	if (record->event.pressed) {
 		switch (keycode) {
 		case CK_OS:
@@ -585,34 +597,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 				break;
 			}
 			break;
-
-		case CK_RESET1:
-			reset1++;
-			break;
-
-		case CK_RESET2:
-			reset2++;
-			break;
 		}
 	} else {
 		switch (keycode) {
 		case CK_OS:
 			led_sethsv(black);
 			break;
-
-		case CK_RESET1:
-			reset1--;
-			break;
-
-		case CK_RESET2:
-			reset2--;
-			break;
 		}
-	}
-
-	if (reset1 && reset2) {
-		led_sethsv(green);
-		reset_keyboard();
 	}
 
 	return true;
