@@ -16,11 +16,11 @@
 #include QMK_KEYBOARD_H
 
 #include <stdio.h>
+#include "strings.c"
 
 enum my_layers {
 	L_BASE,
 	L_FUNC,
-	L_NUM,
 };
 
 static bool win_key_locked = false;
@@ -29,6 +29,14 @@ enum custom_keycodes {
 	CK_TGUI = SAFE_RANGE,   // Toggle between GUI Lock or Unlock
 	CK_PAUS,                // KC_MPLY (or KC_PAUS when modifiers held)
 	CK_RATE,
+	CK_STRF,
+	CK_STRL,
+	CK_STRN,
+	CK_STRE,
+	CK_STRA,
+	CK_STRT,
+	CK_STRY,
+	CK_STRP,
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -61,11 +69,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * |-----------------------------------------------------------|  |--------------|
 	 * |RcS|Rc1|Rc2|   |   |   |   |   |   |   |   |   |   |       |  |Mcr1|Musi|Vol+|
 	 * |-----------------------------------------------------------|  |--------------|
-	 * |     |   |Wak|Eml|   |   |   |   |   |   |Pwr|   |   |Print|  |Mcr2|Mute|Vol-|
+	 * |     |   |Wak|<E>|   |<T>|<Y>|   |   |   |<P>|   |   |Print|  |Mcr2|Mute|Vol-|
 	 * |------------------------------------------------------.Scan|  `--------------'
-	 * |      |   |Slp|   |   |   |   |   |   |   |   |   |   |Rate|
+	 * |      |<A>|Slp|   |<F>|   |   |   |   |<L>|   |   |   |Rate|
 	 * |-----------------------------------------------------------|       ,----.
-	 * |    |   |   |   |Cal|   |   |NlK|   |   |   |   |          |       |    |
+	 * |    |   |   |   |Cal|   |   |<N>|   |   |   |   |          |       |    |
 	 * |-----------------------------------------------------------|  ,--------------.
 	 * |    |Lock|    |                       |    |App  |Func|    |  |Prev|    |Next|
 	 * `-----------------------------------------------------------'  `--------------'
@@ -73,33 +81,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	[L_FUNC] = LAYOUT_tkl_iso(
 		RESET,    _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______,  KC_PAUS,
 		DM_RSTP,  DM_REC1,  DM_REC2,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  DM_PLY1,  KC_MSEL,  KC_VOLU,
-		_______,  _______,  KC_WAKE,  KC_MAIL,  _______,  _______,  _______,  _______,  _______,  _______,  KC_PWR,   _______,  _______,            DM_PLY2,  KC_MUTE,  KC_VOLD,
-		_______,  _______,  KC_SLEP,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  TG(L_NUM),CK_RATE,
-		_______,  _______,  _______,  _______,  KC_CALC,  _______,  _______,  KC_NLCK,  _______,  _______,  _______,  _______,            _______,            _______,
+		_______,  _______,  KC_WAKE,  CK_STRE,  _______,  CK_STRT,  CK_STRY,  _______,  _______,  _______,  CK_STRP,  _______,  _______,            DM_PLY2,  KC_MUTE,  KC_VOLD,
+		_______,  CK_STRA,  KC_SLEP,  _______,  CK_STRF,  _______,  _______,  _______,  _______,  CK_STRL,  _______,  _______,  _______,  CK_RATE,
+		_______,  _______,  _______,  _______,  KC_CALC,  _______,  _______,  CK_STRN,  _______,  _______,  _______,  _______,            _______,            _______,
 		_______,  CK_TGUI,  _______,                                _______,                                _______,  KC_APP,   _______,  _______,  KC_MPRV,  _______,  KC_MNXT
-	),
-	/* Keymap L_NUM: Numeric Keypad Layer
-	 * ,-----------------------------------------------------------.  ,--------------.
-	 * |     |  |   |   |   |  |   |   |   |   |   |   |   |   |   |  | 7  | 8  | 9  |
-	 * |-----------------------------------------------------------|  |--------------|
-	 * |   |   |   |   |   |   |   |   | * |   |   | - | + |       |  | 4  | 5  | 6  |
-	 * |-----------------------------------------------------------|  |--------------|
-	 * |     |   |   |   |   |   |   |   |   |   |   |   |   |     |  | 1  | 2  | 3  |
-	 * |------------------------------------------------------.    |  `--------------'
-	 * |      |   |   |   |   |   |   |   |   |   |   |   |   |    |
-	 * |-----------------------------------------------------------|       ,----.
-	 * |    |   |   |   |   |   |   |   |   |   |   | / |          |       | 0  |
-	 * |-----------------------------------------------------------|  ,--------------.
-	 * |    |    |    |                       |    |     |Func|    |  |    | .  |    |
-	 * `-----------------------------------------------------------'  `--------------'
-	 */
-	[L_NUM] = LAYOUT_tkl_iso(
-		_______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            KC_7,     KC_8,     KC_9,
-		_______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  KC_PAST,  _______,  _______,  KC_PMNS,  KC_PPLS,  _______,  KC_4,     KC_5,     KC_6,
-		_______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            KC_1,     KC_2,     KC_3,
-		_______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-		_______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  KC_PSLS,            _______,            KC_0,
-		_______,  _______,  _______,                                _______,                                _______,  _______,  _______,  _______,  _______,  KC_DOT,   _______
 	),
 #if 0
 	/* Keymap L_EMPTY: Empty Layer
@@ -167,15 +152,41 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 			}
 			return false;
 	}
-	return true;
-}
 
-uint32_t layer_state_set_user(uint32_t state) {
-	static uint32_t prev_state = L_BASE;
+	if (record->event.pressed) {
+		switch (keycode) {
+		case CK_STRF:
+			SEND_STRING(STR_F);
+			break;
 
-	if (layer_state_cmp(state, L_NUM) != layer_state_cmp(prev_state, L_NUM)) {
-		writePin(LED_MR_LOCK_PIN, !layer_state_cmp(state, L_NUM));
+		case CK_STRL:
+			SEND_STRING(STR_L);
+			break;
+
+		case CK_STRN:
+			SEND_STRING(STR_N);
+			break;
+
+		case CK_STRE:
+			SEND_STRING(STR_E);
+			break;
+
+		case CK_STRA:
+			SEND_STRING(STR_A);
+			break;
+
+		case CK_STRT:
+			SEND_STRING(STR_T);
+			break;
+
+		case CK_STRY:
+			SEND_STRING(STR_Y);
+			break;
+
+		case CK_STRP:
+			SEND_STRING(STR_P);
+			break;
+		}
 	}
-
-	return prev_state = state;
+	return true;
 }
