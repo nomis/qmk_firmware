@@ -25,6 +25,7 @@ enum my_layers {
 	L_TOP_RIGHT,
 	L_BOTTOM_LEFT,
 	L_BOTTOM_RIGHT,
+	L_BLOCK,
 };
 
 enum custom_keycodes {
@@ -409,6 +410,41 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		_______,               _______,               _______,               _______,
 		_______,               _______,               _______,               _______
 	),
+	/* Keymap L_BLOCK: Blocking Layer
+	 * ,-----------------------------------.
+	 * | Portal | Stience|   (λ)  | Portal |
+	 * |        |        |        |        |
+	 * | Orange |  Blue  | Orange |  Blue  |
+	 * |-----------------------------------|
+	 * |XXXXXXXX|XXXXXXXX|XXXXXXXX|XXXXXXXX|
+	 * |XXXXXXXX|XXXXXXXX|XXXXXXXX|XXXXXXXX|
+	 * |XXXXXXXX|XXXXXXXX|XXXXXXXX|XXXXXXXX|
+	 * |-----------------------------------|
+	 * |XXXXXXXX|XXXXXXXX|XXXXXXXX|XXXXXXXX|
+	 * |XXXXXXXX|XXXXXXXX|XXXXXXXX|XXXXXXXX|
+	 * |XXXXXXXX|XXXXXXXX|XXXXXXXX|XXXXXXXX|
+	 * |-----------------------------------|
+	 * |        |        |        |        |
+	 * |        |        |        |        |
+	 * |        |        |        |        |
+	 * |-----------------------------------|
+	 * |        |        |        |        |
+	 * |        |        |        |        |
+	 * |        |        |        |        |
+	 * |-----------------------------------|
+	 * |        |        |        |        |
+	 * |        |        |        |        |
+	 * |        |        |        |        |
+	 * `-----------------------------------'
+	 */
+	[L_BLOCK] = LAYOUT_ortho_6x4(
+		_______,               _______,               _______,               _______,
+		XXXXXXX,               XXXXXXX,               XXXXXXX,               XXXXXXX,
+		XXXXXXX,               XXXXXXX,               XXXXXXX,               XXXXXXX,
+		_______,               _______,               _______,               _______,
+		_______,               _______,               _______,               _______,
+		_______,               _______,               _______,               _______
+	),
 #if 0
 	/* Keymap L_EMPTY: Empty Layer
 	 * ,-----------------------------------.
@@ -504,6 +540,12 @@ uint32_t layer_state_set_user(uint32_t state) {
 	layers += layer_state_cmp(state, L_TOP) ? 1 : 0;
 	layers += layer_state_cmp(state, L_BOTTOM) ? 1 : 0;
 	layers += layer_state_cmp(state, L_RIGHT) ? 1 : 0;
+
+	if (layers >= 3) {
+		state |= (1UL << L_BLOCK);
+	} else {
+		state &= ~(1UL << L_BLOCK);
+	}
 
 	if (layers == 4) {
 		led_sethsv(green);
