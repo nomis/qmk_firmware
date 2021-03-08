@@ -525,10 +525,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 #define BRIGHTNESS 128
 static const HSV red = { 0, 255, BRIGHTNESS };
 static const HSV orange = { 10, 255, BRIGHTNESS };
+static const HSV yellow = { 43, 255, BRIGHTNESS };
 static const HSV green = { 85, 255, BRIGHTNESS };
 static const HSV blue = { 170, 255, BRIGHTNESS };
+static const HSV light_blue = { 145, 255, BRIGHTNESS };
 static const HSV cyan = { 128, 255, BRIGHTNESS };
+static const HSV purple = { 191, 255, BRIGHTNESS };
 static const HSV white = { 0, 0, BRIGHTNESS };
+static const HSV grey = { 0, 0, BRIGHTNESS/2 };
 static const HSV black = { HSV_BLACK };
 
 static void led_sethsv(HSV hsv) {
@@ -664,6 +668,31 @@ uint32_t layer_state_set_user(uint32_t state) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 	if (record->event.pressed) {
 		switch (keycode) {
+		case LCTL(LSFT(KC_M)):
+		case LCTL(LSFT(KC_O)):
+			led_sethsv(purple);
+			break;
+
+		case LALT(KC_V):
+		case LALT(KC_A):
+			led_sethsv(light_blue);
+			break;
+
+		case LCTL(KC_X):
+		case LSFT(KC_DEL):
+			led_sethsv(grey);
+			break;
+
+		case LCTL(KC_C):
+		case LCTL(KC_INS):
+			led_sethsv(blue);
+			break;
+
+		case LCTL(KC_V):
+		case LSFT(KC_INS):
+			led_sethsv(yellow);
+			break;
+
 		case CK_OS:
 			switch(get_unicode_input_mode()) {
 			case UC_LNX:
@@ -702,6 +731,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 		}
 	} else {
 		switch (keycode) {
+		case LCTL(LSFT(KC_M)):
+		case LCTL(LSFT(KC_O)):
+		case LALT(KC_V):
+		case LALT(KC_A):
+		case LCTL(KC_X):
+		case LSFT(KC_DEL):
+		case LCTL(KC_C):
+		case LCTL(KC_INS):
+		case LCTL(KC_V):
+		case LSFT(KC_INS):
 		case CK_OS:
 		case CK_CLIP:
 			led_sethsv(black);
