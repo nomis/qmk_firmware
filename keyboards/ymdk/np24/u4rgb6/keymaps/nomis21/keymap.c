@@ -26,6 +26,9 @@ enum my_layers {
 
 enum custom_keycodes {
 	CK_RATE = SAFE_RANGE,
+	CK_3_0S,
+	CK_6_0S,
+	CK_9_0S,
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -100,26 +103,26 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	),
 	/* Keymap L_FUNC: Function Layer
 	 * ,-------------------.
-	 * |    |    |Func|    |
+	 * |Rset|    |Func|    |
 	 * |-------------------|
 	 * |Real|    |    |    |
 	 * |-------------------|
-	 * |    |    |    |    |
+	 * |    |    | 0*9|    |
 	 * |--------------|    |
-	 * |    |    |    |    |
+	 * |    |    | 0*6|    |
 	 * |-------------------|
-	 * |    |    |    |    |
-	 * |--------------|    |
-	 * |         |Rset|    |
+	 * |    |    | 0*3|    |
+	 * |--------------|Rate|
+	 * |         |  , |    |
 	 * `-------------------'
 	 */
 	[L_FUNC] = LAYOUT_numpad_6x4(
-		_______,   _______,   _______,   _______,
+		RESET,     _______,   _______,   _______,
 		TG(L_REAL),_______,   _______,   _______,
-		_______,   _______,   _______,
-		_______,   _______,   _______,   _______,
-		_______,   _______,   _______,
-		_______,              RESET,     CK_RATE
+		_______,   _______,   CK_9_0S,
+		_______,   _______,   CK_6_0S,   _______,
+		_______,   _______,   CK_3_0S,
+		_______,              KC_COMM,   CK_RATE
 	),
 };
 
@@ -215,19 +218,29 @@ uint32_t layer_state_set_user(uint32_t state) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-	switch (keycode) {
+	if (record->event.pressed) {
+		switch (keycode) {
 		case RESET:
 			led_sethsv(blue);
 			break;
 
 		case CK_RATE:
-			if (record->event.pressed) {
+			{
 				char scan_rate[15];
 				snprintf(scan_rate, sizeof(scan_rate), "%lu", get_matrix_scan_rate());
 				send_string(scan_rate);
 				SEND_STRING(SS_TAP(X_ENTER));
 			}
 			return false;
+
+		case CK_9_0S:
+		case CK_6_0S:
+		case CK_3_0S:
+			for (uint8_t i = (keycode - CK_3_0S) + 1; i > 0; i--) {
+				SEND_STRING("000");
+			}
+			return false;
+		}
 	}
 	return true;
 }
