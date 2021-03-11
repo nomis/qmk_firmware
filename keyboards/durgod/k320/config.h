@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DEVICE_VER      0x0001
 #define MANUFACTURER    Hoksi Technology
 #define PRODUCT         DURGOD Taurus K320 (QMK)
+#define USB_POLLING_INTERVAL_MS 1
 
 /* key matrix size */
 #define MATRIX_ROWS 7
@@ -51,3 +52,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define LED_MR_LOCK_PIN     A10
 #define LED_PIN_ON_STATE    0
 
+#define WAIT_US_TIMER       GPTD3

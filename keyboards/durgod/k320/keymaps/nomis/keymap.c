@@ -161,7 +161,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 		case CK_RATE:
 			if (record->event.pressed) {
 				char scan_rate[15];
-				snprintf(scan_rate, sizeof(scan_rate), "%lu", get_matrix_scan_rate());
+				snprintf(scan_rate, sizeof(scan_rate), " %lu", get_matrix_scan_rate());
 				send_string(scan_rate);
 				SEND_STRING(SS_TAP(X_ENTER));
 			}

@@ -39,4 +39,3 @@ void led_init_ports(void) {
     setPinOutput(LED_MR_LOCK_PIN);
     off_all_leds();
 }
-
