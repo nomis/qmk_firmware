@@ -24,6 +24,7 @@
 #define DEVICE_VER      0x0001
 #define MANUFACTURER    Hoksi Technology
 #define PRODUCT         DURGOD Taurus K320 (QMK)
+#define USB_POLLING_INTERVAL_MS 1
 
 /* key matrix size */
 #define MATRIX_ROWS 7
