@@ -129,7 +129,7 @@ static bool read_cols_on_row(matrix_row_t current_matrix[], uint8_t current_row)
 
     // Unselect row
     unselect_row(current_row);
-    if (current_row + 1 < MATRIX_ROWS) {
+    if (MATRIX_ROWS == 1 || current_row + 1 < MATRIX_ROWS) {
         matrix_output_unselect_delay();  // wait for row signal to go HIGH
     }
 
@@ -191,7 +191,7 @@ static bool read_rows_on_col(matrix_row_t current_matrix[], uint8_t current_col)
 
     // Unselect col
     unselect_col(current_col);
-    if (current_col + 1 < MATRIX_COLS) {
+    if (MATRIX_COLS == 1 || current_col + 1 < MATRIX_COLS) {
         matrix_output_unselect_delay();  // wait for col signal to go HIGH
     }
 
