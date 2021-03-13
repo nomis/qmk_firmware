@@ -19,11 +19,9 @@
 
 #include "config_common.h"
 
-/* key matrix size */
-#define MATRIX_ROWS 8
+/* key matrix size (rows in specific keyboard variant) */
 #define MATRIX_COLS 16
 
-#define MATRIX_ROW_PINS { A0, A1, A2, A3, A4, A5, A6, A7 }
 #define MATRIX_COL_PINS { C4, C5, B0, B1, B2, B10, B11, B12, B13, B14, B15, C6, C7, C10, C11, C12 }
 
 /* COL2ROW, ROW2COL*/

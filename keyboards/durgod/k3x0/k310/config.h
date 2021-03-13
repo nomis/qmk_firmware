@@ -26,5 +26,10 @@
 #define MANUFACTURER    Hoksi Technology
 #define PRODUCT         DURGOD Taurus K310 (QMK)
 
+/* key matrix size (cols in generic keyboard config) */
+#define MATRIX_ROWS 8
+
+#define MATRIX_ROW_PINS { A0, A1, A2, A3, A4, A5, A6, A7 }
+
 /* LED indicator pins */
 #define LED_NUM_LOCK_PIN    C8
