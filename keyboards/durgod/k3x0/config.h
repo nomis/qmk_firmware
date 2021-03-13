@@ -1,4 +1,5 @@
 /* Copyright 2021 Don Kjer and Tyler Tidman
+ * Copyright 2021 Simon Arlott
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +43,6 @@
 #define BOOTMAGIC_LITE_COLUMN              0
 
 /* LED indicator pins */
-#define LED_NUM_LOCK_PIN    C8
 #define LED_CAPS_LOCK_PIN   C9
 #define LED_SCROLL_LOCK_PIN A8
 #define LED_WIN_LOCK_PIN    A9

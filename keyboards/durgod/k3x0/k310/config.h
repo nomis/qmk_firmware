@@ -1,4 +1,5 @@
 /* Copyright 2021 Don Kjer and Tyler Tidman
+ * Copyright 2021 Simon Arlott
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,3 +25,6 @@
 #define DEVICE_VER      0x0001
 #define MANUFACTURER    Hoksi Technology
 #define PRODUCT         DURGOD Taurus K310 (QMK)
+
+/* LED indicator pins */
+#define LED_NUM_LOCK_PIN    C8
