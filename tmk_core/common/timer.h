@@ -52,6 +52,25 @@ uint32_t timer_elapsed32(uint32_t last);
 #define timer_expired(current, future) ((uint16_t)(current - future) < UINT16_MAX / 2)
 #define timer_expired32(current, future) ((uint32_t)(current - future) < UINT32_MAX / 2)
 
+// Use an appropriate timer integer size based on architecture (16-bit will overflow sooner)
+#if defined(__AVR__)
+typedef uint16_t fast_timer_t;
+
+#    define TIMER_DIFF_FAST(a, b) TIMER_DIFF_16(a, b)
+#    define timer_expired_fast(current, future) timer_expired(current, future)
+
+fast_timer_t inline timer_read_fast(void) { return timer_read(); }
+fast_timer_t inline timer_elapsed_fast(fast_timer_t last) { return timer_elapsed(last); }
+#else
+typedef uint32_t fast_timer_t;
+
+#    define TIMER_DIFF_FAST(a, b) TIMER_DIFF_32(a, b)
+#    define timer_expired_fast(current, future) timer_expired32(current, future)
+
+fast_timer_t inline timer_read_fast(void) { return timer_read32(); }
+fast_timer_t inline timer_elapsed_fast(fast_timer_t last) { return timer_elapsed32(last); }
+#endif
+
 #if defined(PROTOCOL_CHIBIOS) && defined(WAIT_US_TIMER)
 void timer_wait_us(gptcnt_t duration);
 #endif
