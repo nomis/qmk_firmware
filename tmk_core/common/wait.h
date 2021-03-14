@@ -99,14 +99,28 @@ __attribute__((always_inline)) static inline void wait_cpuclock_allnop(unsigned 
                 chThdSleepMicroseconds(1);  \
             }                               \
         } while (0)
-#    define wait_us(us)                     \
-        do {                                \
-            if (us != 0) {                  \
-                chThdSleepMicroseconds(us); \
-            } else {                        \
-                chThdSleepMicroseconds(1);  \
-            }                               \
-        } while (0)
+#    ifdef WAIT_US_TIMER
+#        include <hal.h>
+#        define wait_us(us)                                         \
+            do {                                                    \
+                if (us == 0) {                                      \
+                    timer_wait_us(1);                               \
+                } else if (us < (1ULL << (sizeof(gptcnt_t) * 8))) { \
+                    timer_wait_us(us);                              \
+                } else {                                            \
+                    chThdSleepMicroseconds(us);                     \
+                }                                                   \
+            } while (0)
+#    else
+#       define wait_us(us)                      \
+            do {                                \
+                if (us != 0) {                  \
+                    chThdSleepMicroseconds(us); \
+                } else {                        \
+                    chThdSleepMicroseconds(1);  \
+                }                               \
+            } while (0)
+#    endif
 #elif defined PROTOCOL_ARM_ATSAM
 #    include "clks.h"
 #    define wait_ms(ms) CLK_delay_ms(ms)
