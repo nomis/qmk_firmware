@@ -1,0 +1,3 @@
+DEBUG_MATRIX_SCAN_RATE_ENABLE = api
+DEBOUNCE_TYPE = sym_defer_pk
+LTO_ENABLE = yes
