@@ -1,5 +1,5 @@
 DEBUG_MATRIX_SCAN_RATE_ENABLE = api
 NKRO_ENABLE = no
-DEBOUNCE_TYPE = sym_defer_pk
+DEBOUNCE_TYPE = asym_eager_defer_pk
 DYNAMIC_MACRO_ENABLE = yes
 LTO_ENABLE = yes
