@@ -1,0 +1,12 @@
+#pragma once
+
+#undef VENDOR_ID
+#undef PRODUCT_ID
+
+#define VENDOR_ID      0x1209
+#define PRODUCT_ID     0x0003
+
+#define UNICODE_SELECTED_MODES UC_LNX
+
+#undef RGBLIGHT_ANIMATIONS
+#undef RGBLIGHT_DEFAULT_MODE
