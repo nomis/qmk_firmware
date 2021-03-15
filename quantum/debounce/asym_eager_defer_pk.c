@@ -37,15 +37,18 @@ When no state changes have occured for DEBOUNCE milliseconds, we push the state.
 #    define DEBOUNCE 5
 #endif
 
-// Maximum debounce: 255ms
-#if DEBOUNCE > UINT8_MAX
+// Maximum debounce: 127ms
+#if DEBOUNCE > 127
 #    undef DEBOUNCE
-#    define DEBOUNCE UINT8_MAX
+#    define DEBOUNCE 127
 #endif
 
 #define ROW_SHIFTER ((matrix_row_t)1)
 
-typedef uint8_t debounce_counter_t;
+typedef struct {
+    bool pressed : 1;
+    uint8_t time : 7;
+} debounce_counter_t;
 
 #if DEBOUNCE > 0
 static debounce_counter_t *debounce_counters;
@@ -64,7 +67,7 @@ void debounce_init(uint8_t num_rows) {
     int i = 0;
     for (uint8_t r = 0; r < num_rows; r++) {
         for (uint8_t c = 0; c < MATRIX_COLS; c++) {
-            debounce_counters[i++] = 0;
+            debounce_counters[i++].time = DEBOUNCE_ELAPSED;
         }
     }
 }
@@ -106,18 +109,19 @@ static void update_debounce_counters_and_transfer_if_expired(matrix_row_t raw[],
         for (uint8_t col = 0; col < MATRIX_COLS; col++) {
             matrix_row_t col_mask = (ROW_SHIFTER << col);
 
-            if (*debounce_pointer != DEBOUNCE_ELAPSED) {
-                if (*debounce_pointer <= elapsed_time) {
-                    *debounce_pointer = DEBOUNCE_ELAPSED;
+            if (debounce_pointer->time != DEBOUNCE_ELAPSED) {
+                if (debounce_pointer->time <= elapsed_time) {
+                    debounce_pointer->time = DEBOUNCE_ELAPSED;
 
-                    if (cooked[row] & col_mask) {
+                    if (debounce_pointer->pressed) {
+                        // key-down: eager
+                        matrix_need_update = true;
+                    } else {
                         // key-up: defer
                         cooked[row] = (cooked[row] & ~col_mask) | (raw[row] & col_mask);
                     }
-
-                    matrix_need_update = true;
                 } else {
-                    *debounce_pointer -= elapsed_time;
+                    debounce_pointer->time -= elapsed_time;
                     counters_need_update = true;
                 }
             }
@@ -135,17 +139,21 @@ static void transfer_matrix_values(matrix_row_t raw[], matrix_row_t cooked[], ui
             matrix_row_t col_mask = (ROW_SHIFTER << col);
 
             if (delta & col_mask) {
-                if (*debounce_pointer == DEBOUNCE_ELAPSED) {
-                    *debounce_pointer = DEBOUNCE;
+                if (debounce_pointer->time == DEBOUNCE_ELAPSED) {
+                    debounce_pointer->pressed = (raw[row] & col_mask);
+                    debounce_pointer->time = DEBOUNCE;
                     counters_need_update = true;
 
-                    if (!(cooked[row] & col_mask)) {
+                    if (debounce_pointer->pressed) {
                         // key-down: eager
                         cooked[row] ^= col_mask;
                     }
                 }
-            } else {
-                *debounce_pointer = DEBOUNCE_ELAPSED;
+            } else if (debounce_pointer->time != DEBOUNCE_ELAPSED) {
+                if (!debounce_pointer->pressed) {
+                    // key-up: defer
+                    debounce_pointer->time = DEBOUNCE_ELAPSED;
+                }
             }
             debounce_pointer++;
         }
