@@ -60,7 +60,7 @@ void debounce_init(uint8_t num_rows) {
     int i             = 0;
     for (uint8_t r = 0; r < num_rows; r++) {
         for (uint8_t c = 0; c < MATRIX_COLS; c++) {
-            debounce_counters[i++] = 0;
+            debounce_counters[i++] = DEBOUNCE_ELAPSED;
         }
     }
 }
