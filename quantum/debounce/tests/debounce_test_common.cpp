@@ -19,7 +19,8 @@
 #include "debounce_test_common.h"
 
 #include <algorithm>
-#include <ostream>
+#include <iomanip>
+#include <sstream>
 
 extern "C" {
 #include "quantum.h"
@@ -38,46 +39,57 @@ void DebounceTest::addEvents(std::initializer_list<DebounceTestEvent> events) {
     events_.insert(events_.end(), events.begin(), events.end());
 }
 
-void DebounceTest::runEvents(fast_timer_t time_offset) {
+void DebounceTest::runEvents() {
     /* Run the test multiple times, from 1kHz to 10kHz scan rate */
     for (int extra_iterations = 0; extra_iterations < 10; extra_iterations++) {
-        runEventsInternal(time_offset, extra_iterations);
+        if (time_jumps_) {
+            /* Don't advance time smoothly, jump to the next event (some tests require this) */
+            runEventsInternal(extra_iterations, false);
+        } else {
+            /* Run the test with both smooth and irregular time; it must produce the same result */
+            runEventsInternal(extra_iterations, true);
+            runEventsInternal(extra_iterations, false);
+        }
     }
 }
 
-void DebounceTest::runEventsInternal(fast_timer_t time_offset, int extra_iterations) {
+void DebounceTest::runEventsInternal(int extra_iterations, bool auto_advance_time) {
     matrix_row_t raw_matrix[MATRIX_ROWS];
     matrix_row_t cooked_matrix[MATRIX_ROWS];
     fast_timer_t previous = 0;
     bool first = true;
 
     /* Initialise keyboard with start time (offset to avoid testing at 0) and all keys UP */
-    set_time(time_offset);
+    SetUp();
+    set_time(time_offset_);
     std::fill(std::begin(input_matrix_), std::end(input_matrix_), 0);
     std::fill(std::begin(output_matrix_), std::end(output_matrix_), 0);
 
     for (auto &event : events_) {
-        if (!first && event.time_ == previous + 1) {
+        if (!auto_advance_time) {
+            /* Jump to the next event */
+            set_time(time_offset_ + event.time_);
+        } else if (!first && event.time_ == previous + 1) {
             /* This event immediately follows the previous one, don't make extra debounce() calls */
             advance_time(1);
         } else {
             /* Fast forward to the time for this event, calling debounce() with no changes */
-            ASSERT_LT((time_offset + event.time_) - timer_read_fast(), 60000) << "Test tries to advance more than 1 minute of time";
+            ASSERT_LT((time_offset_ + event.time_) - timer_read_fast(), 60000) << "Test tries to advance more than 1 minute of time";
 
-            while (timer_read_fast() != time_offset + event.time_) {
+            while (timer_read_fast() != time_offset_ + event.time_) {
                 std::copy(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix));
                 std::copy(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix));
 
                 debounce(raw_matrix, cooked_matrix, MATRIX_ROWS, false);
 
                 if (!std::equal(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix))) {
-                    FAIL() << "Fatal error: debounce() modified raw matrix at time " << (timer_read_fast() - time_offset)
+                    FAIL() << "Fatal error: debounce() modified raw matrix at " << strTime(extra_iterations, auto_advance_time)
                         << "\ninput_matrix: changed=false\n" << strMatrix(input_matrix_)
                         << "\nraw_matrix:\n" << strMatrix(raw_matrix);
                 }
 
                 if (!std::equal(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix))) {
-                    FAIL() << "Unexpected event: debounce() modified cooked matrix at time " << (timer_read_fast() - time_offset)
+                    FAIL() << "Unexpected event: debounce() modified cooked matrix at " << strTime(extra_iterations, auto_advance_time)
                     << "\ninput_matrix: changed=false\n" << strMatrix(input_matrix_)
                     << "\nexpected_matrix:\n" << strMatrix(output_matrix_)
                     << "\nactual_matrix:\n" << strMatrix(cooked_matrix);
@@ -95,7 +107,7 @@ void DebounceTest::runEventsInternal(fast_timer_t time_offset, int extra_iterati
             switch (input.direction_) {
             case DOWN:
                 ASSERT_EQ(!!(input_matrix_[input.row_] & (1U << input.col_)), false)
-                    << "Test input at time " << (timer_read_fast() - time_offset)
+                    << "Test input at " << strTime(extra_iterations, auto_advance_time)
                     << " sets key " << input.row_ << "," << input.col_ << " down but it is already down"
                     << "\ninput_matrix:\n" << strMatrix(input_matrix_);
                 input_matrix_[input.row_] |= (1U << input.col_);
@@ -103,7 +115,7 @@ void DebounceTest::runEventsInternal(fast_timer_t time_offset, int extra_iterati
 
             case UP:
                 ASSERT_EQ(!!(input_matrix_[input.row_] & (1U << input.col_)), true)
-                    << "Test input at time " << (timer_read_fast() - time_offset)
+                    << "Test input at " << strTime(extra_iterations, auto_advance_time)
                     << " sets key " << input.row_ << "," << input.col_ << " up but it is already up"
                     << "\ninput_matrix:\n" << strMatrix(input_matrix_);
                 input_matrix_[input.row_] &= ~(1U << input.col_);
@@ -118,7 +130,7 @@ void DebounceTest::runEventsInternal(fast_timer_t time_offset, int extra_iterati
         debounce(raw_matrix, cooked_matrix, MATRIX_ROWS, !event.inputs_.empty());
 
         if (!std::equal(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix))) {
-            FAIL() << "Fatal error: debounce() modified raw matrix at time " << (timer_read_fast() - time_offset)
+            FAIL() << "Fatal error: debounce() modified raw matrix at " << strTime(extra_iterations, auto_advance_time)
                 << "\ninput_matrix: changed=" << !event.inputs_.empty() << "\n" << strMatrix(input_matrix_)
                 << "\nraw_matrix:\n" << strMatrix(raw_matrix);
         }
@@ -128,7 +140,7 @@ void DebounceTest::runEventsInternal(fast_timer_t time_offset, int extra_iterati
             switch (output.direction_) {
             case DOWN:
                 ASSERT_EQ(!!(output_matrix_[output.row_] & (1U << output.col_)), false)
-                    << "Test output at time " << (timer_read_fast() - time_offset)
+                    << "Test output at " << strTime(extra_iterations, auto_advance_time)
                     << " sets key " << output.row_ << "," << output.col_ << " down but it is already down"
                     << "\noutput_matrix:\n" << strMatrix(output_matrix_);
                 output_matrix_[output.row_] |= (1U << output.col_);
@@ -136,7 +148,7 @@ void DebounceTest::runEventsInternal(fast_timer_t time_offset, int extra_iterati
 
             case UP:
                 ASSERT_EQ(!!(output_matrix_[output.row_] & (1U << output.col_)), true)
-                    << "Test output at time " << (timer_read_fast() - time_offset)
+                    << "Test output at " << strTime(extra_iterations, auto_advance_time)
                     << " sets key " << output.row_ << "," << output.col_ << " up but it is already up"
                     << "\noutput_matrix:\n" << strMatrix(output_matrix_);
                 output_matrix_[output.row_] &= ~(1U << output.col_);
@@ -149,7 +161,7 @@ void DebounceTest::runEventsInternal(fast_timer_t time_offset, int extra_iterati
             switch (output.direction_) {
             case DOWN:
                 EXPECT_EQ(!!(cooked_matrix[output.row_] & (1U << output.col_)), true)
-                    << "Missing event at time " << (timer_read_fast() - time_offset)
+                    << "Missing event at " << strTime(extra_iterations, auto_advance_time)
                     << " expected key " << output.row_ << "," << output.col_ << " down"
                     << "\ninput_matrix: changed=" << !event.inputs_.empty() << "\n" << strMatrix(input_matrix_)
                     << "\nexpected_matrix:\n" << strMatrix(output_matrix_)
@@ -158,7 +170,7 @@ void DebounceTest::runEventsInternal(fast_timer_t time_offset, int extra_iterati
 
             case UP:
                 EXPECT_EQ(!!(cooked_matrix[output.row_] & (1U << output.col_)), false)
-                    << "Missing event at time " << (timer_read_fast() - time_offset)
+                    << "Missing event at " << strTime(extra_iterations, auto_advance_time)
                     << " expected key " << output.row_ << "," << output.col_ << " up"
                     << "\ninput_matrix: changed=" << !event.inputs_.empty() << "\n" << strMatrix(input_matrix_)
                     << "\nexpected_matrix:\n" << strMatrix(output_matrix_)
@@ -170,7 +182,7 @@ void DebounceTest::runEventsInternal(fast_timer_t time_offset, int extra_iterati
         /* Check output matrix has no other changes */
         if (!std::equal(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix))) {
             FAIL() << "Unexpected event: debounce() cooked matrix does not match expected output matrix"
-                << " at time " << (timer_read_fast() - time_offset)
+                << " at " << strTime(extra_iterations, auto_advance_time)
                 << "\ninput_matrix: changed=" << !event.inputs_.empty() << "\n" << strMatrix(input_matrix_)
                 << "\nexpected_matrix:\n" << strMatrix(output_matrix_)
                 << "\nactual_matrix:\n" << strMatrix(cooked_matrix);
@@ -184,14 +196,14 @@ void DebounceTest::runEventsInternal(fast_timer_t time_offset, int extra_iterati
             debounce(raw_matrix, cooked_matrix, MATRIX_ROWS, false);
 
             if (!std::equal(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix))) {
-                FAIL() << "Fatal error: debounce() modified raw matrix at time " << (timer_read_fast() - time_offset)
+                FAIL() << "Fatal error: debounce() modified raw matrix at " << strTime(extra_iterations, auto_advance_time)
                     << " extra iteration " << i << " of " << extra_iterations
                     << "\ninput_matrix: changed=false\n" << strMatrix(input_matrix_)
                     << "\nraw_matrix:\n" << strMatrix(raw_matrix);
             }
 
             if (!std::equal(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix))) {
-                FAIL() << "Unexpected event: debounce() modified cooked matrix at time " << (timer_read_fast() - time_offset)
+                FAIL() << "Unexpected event: debounce() modified cooked matrix at " << strTime(extra_iterations, auto_advance_time)
                 << " extra iteration " << i << " of " << extra_iterations
                 << "\ninput_matrix: changed=false\n" << strMatrix(input_matrix_)
                 << "\nexpected_matrix:\n" << strMatrix(output_matrix_)
@@ -211,13 +223,13 @@ void DebounceTest::runEventsInternal(fast_timer_t time_offset, int extra_iterati
         debounce(raw_matrix, cooked_matrix, MATRIX_ROWS, false);
 
         if (!std::equal(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix))) {
-            FAIL() << "Fatal error: debounce() modified raw matrix at time " << (timer_read_fast() - time_offset)
+            FAIL() << "Fatal error: debounce() modified raw matrix at " << strTime(extra_iterations, auto_advance_time)
                 << "\ninput_matrix: changed=false\n" << strMatrix(input_matrix_)
                 << "\nraw_matrix:\n" << strMatrix(raw_matrix);
         }
 
         if (!std::equal(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix))) {
-            FAIL() << "Unexpected event: debounce() modified cooked matrix at time " << (timer_read_fast() - time_offset)
+            FAIL() << "Unexpected event: debounce() modified cooked matrix at " << strTime(extra_iterations, auto_advance_time)
                 << "\ninput_matrix: changed=false\n" << strMatrix(input_matrix_)
                 << "\nexpected_matrix:\n" << strMatrix(output_matrix_)
                 << "\nactual_matrix:\n" << strMatrix(cooked_matrix);
@@ -227,34 +239,35 @@ void DebounceTest::runEventsInternal(fast_timer_t time_offset, int extra_iterati
     }
 }
 
-std::string DebounceTest::strMatrix(matrix_row_t matrix[]) {
-    std::string text;
+std::string DebounceTest::strTime(int extra_iterations, bool auto_advance_time) {
+    std::stringstream text;
 
-    text += "\t   ";
+    text << "time " << (timer_read_fast() - time_offset_)
+        << " (extra_iterations=" << extra_iterations
+        << ", auto_advance_time=" << auto_advance_time << ")";
+
+    return text.str();
+}
+
+std::string DebounceTest::strMatrix(matrix_row_t matrix[]) {
+    std::stringstream text;
+
+    text << "\t" << std::setw(3) << "";
     for (int col = 0; col < MATRIX_COLS; col++) {
-        if (col < 10) {
-            text += " ";
-        }
-        text += " " + std::to_string(col);
+        text << " " << std::setw(2) << col;
     }
-    text += "\n";
+    text << "\n";
 
     for (int row = 0; row < MATRIX_ROWS; row++) {
-        text += "\t";
-
-        if (row < 10) {
-            text += " ";
-        }
-
-        text += std::to_string(row) + ":";
+        text << "\t" << std::setw(2) << row << ":";
         for (int col = 0; col < MATRIX_COLS; col++) {
-            text += (matrix[row] & (1U << col)) ? " XX" : " __";
+            text << ((matrix[row] & (1U << col)) ? " XX" : " __");
         }
 
-        text += "\n";
+        text << "\n";
     }
 
-    return text;
+    return text.str();
 }
 
 DebounceTestEvent::DebounceTestEvent(fast_timer_t time,

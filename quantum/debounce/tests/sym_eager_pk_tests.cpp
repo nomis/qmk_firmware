@@ -165,3 +165,73 @@ TEST_F(DebounceTest, TwoKeysShort) {
     });
     runEvents();
 }
+
+TEST_F(DebounceTest, OneKeyDelayedScan1) {
+    addEvents({ /* Time, Inputs, Outputs */
+        {0, {{0, 1, DOWN}}, {{0, 1, DOWN}}},
+
+        /* Processing is very late but the change will now be accepted */
+        {300, {{0, 1, UP}}, {{0, 1, UP}}},
+    });
+    time_jumps_ = true;
+    runEvents();
+}
+
+TEST_F(DebounceTest, OneKeyDelayedScan2) {
+    addEvents({ /* Time, Inputs, Outputs */
+        {0, {{0, 1, DOWN}}, {{0, 1, DOWN}}},
+
+        /* Processing is very late but the change will now be accepted even with a 1 scan delay */
+        {300, {}, {}},
+        {300, {{0, 1, UP}}, {{0, 1, UP}}},
+    });
+    time_jumps_ = true;
+    runEvents();
+}
+
+TEST_F(DebounceTest, OneKeyDelayedScan3) {
+    addEvents({ /* Time, Inputs, Outputs */
+        {0, {{0, 1, DOWN}}, {{0, 1, DOWN}}},
+
+        /* Processing is very late but the change will now be accepted even with a 1ms delay */
+        {300, {}, {}},
+        {301, {{0, 1, UP}}, {{0, 1, UP}}},
+    });
+    time_jumps_ = true;
+    runEvents();
+}
+
+TEST_F(DebounceTest, OneKeyDelayedScan4) {
+    addEvents({ /* Time, Inputs, Outputs */
+        {0, {{0, 1, DOWN}}, {{0, 1, DOWN}}},
+
+        /* Processing is a bit late but the change will now be accepted */
+        {50, {{0, 1, UP}}, {{0, 1, UP}}},
+    });
+    time_jumps_ = true;
+    runEvents();
+}
+
+TEST_F(DebounceTest, OneKeyDelayedScan5) {
+    addEvents({ /* Time, Inputs, Outputs */
+        {0, {{0, 1, DOWN}}, {{0, 1, DOWN}}},
+
+        /* Processing is very late but the change will now be accepted even with a 1 scan delay */
+        {50, {}, {}},
+        {50, {{0, 1, UP}}, {{0, 1, UP}}},
+    });
+    time_jumps_ = true;
+    runEvents();
+}
+
+TEST_F(DebounceTest, OneKeyDelayedScan6) {
+    addEvents({ /* Time, Inputs, Outputs */
+        {0, {{0, 1, DOWN}}, {{0, 1, DOWN}}},
+
+        /* Processing is very late but the change will now be accepted even with a 1ms delay */
+        {50, {}, {}},
+        {51, {{0, 1, UP}}, {{0, 1, UP}}},
+    });
+    time_jumps_ = true;
+    runEvents();
+}

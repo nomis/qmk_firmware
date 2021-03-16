@@ -56,11 +56,15 @@ protected:
     void SetUp() override;
 
     void addEvents(std::initializer_list<DebounceTestEvent> events);
-    void runEvents(fast_timer_t time_offset = 7777);
+    void runEvents();
+
+    fast_timer_t time_offset_ = 7777;
+    bool time_jumps_ = false;
 
 private:
-    void runEventsInternal(fast_timer_t time_offset, int extra_iterations);
+    void runEventsInternal(int extra_iterations, bool auto_advance_time);
 
+    std::string strTime(int extra_iterations, bool auto_advance_time);
     std::string strMatrix(matrix_row_t matrix[]);
 
     std::list<DebounceTestEvent> events_;

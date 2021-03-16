@@ -167,3 +167,59 @@ TEST_F(DebounceTest, TwoKeysSimultaneous2) {
     });
     runEvents();
 }
+
+TEST_F(DebounceTest, OneKeyDelayedScan1) {
+    addEvents({ /* Time, Inputs, Outputs */
+        {0, {{0, 1, DOWN}}, {}},
+
+        /* Processing is very late */
+        {300, {}, {{0, 1, DOWN}}},
+        /* Immediately release key */
+        {300, {{0, 1, UP}}, {}},
+
+        {305, {}, {{0, 1, UP}}},
+    });
+    time_jumps_ = true;
+    runEvents();
+}
+
+TEST_F(DebounceTest, OneKeyDelayedScan2) {
+    addEvents({ /* Time, Inputs, Outputs */
+        {0, {{0, 1, DOWN}}, {}},
+
+        /* Processing is very late */
+        {300, {}, {{0, 1, DOWN}}},
+        /* Release key after 1ms */
+        {301, {{0, 1, UP}}, {}},
+
+        {306, {}, {{0, 1, UP}}},
+    });
+    time_jumps_ = true;
+    runEvents();
+}
+
+TEST_F(DebounceTest, OneKeyDelayedScan3) {
+    addEvents({ /* Time, Inputs, Outputs */
+        {0, {{0, 1, DOWN}}, {}},
+
+        /* Release key before debounce expires */
+        {300, {{0, 1, UP}}, {}},
+    });
+    time_jumps_ = true;
+    runEvents();
+}
+
+TEST_F(DebounceTest, OneKeyDelayedScan4) {
+    addEvents({ /* Time, Inputs, Outputs */
+        {0, {{0, 1, DOWN}}, {}},
+
+        /* Processing is a bit late */
+        {50, {}, {{0, 1, DOWN}}},
+        /* Release key after 1ms */
+        {51, {{0, 1, UP}}, {}},
+
+        {56, {}, {{0, 1, UP}}},
+    });
+    time_jumps_ = true;
+    runEvents();
+}
