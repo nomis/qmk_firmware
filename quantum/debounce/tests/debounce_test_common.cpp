@@ -41,21 +41,22 @@ void DebounceTest::addEvents(std::initializer_list<DebounceTestEvent> events) {
 
 void DebounceTest::runEvents() {
     /* Run the test multiple times, from 1kHz to 10kHz scan rate */
-    for (int extra_iterations = 0; extra_iterations < 10; extra_iterations++) {
+    for (extra_iterations_ = 0; extra_iterations_ < 10; extra_iterations_++) {
         if (time_jumps_) {
             /* Don't advance time smoothly, jump to the next event (some tests require this) */
-            runEventsInternal(extra_iterations, false);
+            auto_advance_time_ = false;
+            runEventsInternal();
         } else {
             /* Run the test with both smooth and irregular time; it must produce the same result */
-            runEventsInternal(extra_iterations, true);
-            runEventsInternal(extra_iterations, false);
+            auto_advance_time_ = true;
+            runEventsInternal();
+            auto_advance_time_ = false;
+            runEventsInternal();
         }
     }
 }
 
-void DebounceTest::runEventsInternal(int extra_iterations, bool auto_advance_time) {
-    matrix_row_t raw_matrix[MATRIX_ROWS];
-    matrix_row_t cooked_matrix[MATRIX_ROWS];
+void DebounceTest::runEventsInternal() {
     fast_timer_t previous = 0;
     bool first = true;
 
@@ -66,7 +67,7 @@ void DebounceTest::runEventsInternal(int extra_iterations, bool auto_advance_tim
     std::fill(std::begin(output_matrix_), std::end(output_matrix_), 0);
 
     for (auto &event : events_) {
-        if (!auto_advance_time) {
+        if (!auto_advance_time_) {
             /* Jump to the next event */
             set_time(time_offset_ + event.time_);
         } else if (!first && event.time_ == previous + 1) {
@@ -77,24 +78,8 @@ void DebounceTest::runEventsInternal(int extra_iterations, bool auto_advance_tim
             ASSERT_LT((time_offset_ + event.time_) - timer_read_fast(), 60000) << "Test tries to advance more than 1 minute of time";
 
             while (timer_read_fast() != time_offset_ + event.time_) {
-                std::copy(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix));
-                std::copy(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix));
-
-                debounce(raw_matrix, cooked_matrix, MATRIX_ROWS, false);
-
-                if (!std::equal(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix))) {
-                    FAIL() << "Fatal error: debounce() modified raw matrix at " << strTime(extra_iterations, auto_advance_time)
-                        << "\ninput_matrix: changed=false\n" << strMatrix(input_matrix_)
-                        << "\nraw_matrix:\n" << strMatrix(raw_matrix);
-                }
-
-                if (!std::equal(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix))) {
-                    FAIL() << "Unexpected event: debounce() modified cooked matrix at " << strTime(extra_iterations, auto_advance_time)
-                    << "\ninput_matrix: changed=false\n" << strMatrix(input_matrix_)
-                    << "\nexpected_matrix:\n" << strMatrix(output_matrix_)
-                    << "\nactual_matrix:\n" << strMatrix(cooked_matrix);
-                }
-
+                runDebounce(false);
+                checkCookedMatrix(false, "debounce() modified cooked matrix");
                 advance_time(1);
             }
         }
@@ -102,149 +87,75 @@ void DebounceTest::runEventsInternal(int extra_iterations, bool auto_advance_tim
         first = false;
         previous = event.time_;
 
-        /* Prepare input matrix (verify that events only include changes) */
+        /* Prepare input matrix */
         for (auto &input : event.inputs_) {
-            switch (input.direction_) {
-            case DOWN:
-                ASSERT_EQ(!!(input_matrix_[input.row_] & (1U << input.col_)), false)
-                    << "Test input at " << strTime(extra_iterations, auto_advance_time)
-                    << " sets key " << input.row_ << "," << input.col_ << " down but it is already down"
-                    << "\ninput_matrix:\n" << strMatrix(input_matrix_);
-                input_matrix_[input.row_] |= (1U << input.col_);
-                break;
-
-            case UP:
-                ASSERT_EQ(!!(input_matrix_[input.row_] & (1U << input.col_)), true)
-                    << "Test input at " << strTime(extra_iterations, auto_advance_time)
-                    << " sets key " << input.row_ << "," << input.col_ << " up but it is already up"
-                    << "\ninput_matrix:\n" << strMatrix(input_matrix_);
-                input_matrix_[input.row_] &= ~(1U << input.col_);
-                break;
-            }
+            matrixUpdate(input_matrix_, "input", input);
         }
 
         /* Call debounce */
-        std::copy(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix));
-        std::copy(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix));
+        runDebounce(!event.inputs_.empty());
 
-        debounce(raw_matrix, cooked_matrix, MATRIX_ROWS, !event.inputs_.empty());
-
-        if (!std::equal(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix))) {
-            FAIL() << "Fatal error: debounce() modified raw matrix at " << strTime(extra_iterations, auto_advance_time)
-                << "\ninput_matrix: changed=" << !event.inputs_.empty() << "\n" << strMatrix(input_matrix_)
-                << "\nraw_matrix:\n" << strMatrix(raw_matrix);
-        }
-
-        /* Prepare output matrix (verify that events only include changes) */
+        /* Prepare output matrix */
         for (auto &output : event.outputs_) {
-            switch (output.direction_) {
-            case DOWN:
-                ASSERT_EQ(!!(output_matrix_[output.row_] & (1U << output.col_)), false)
-                    << "Test output at " << strTime(extra_iterations, auto_advance_time)
-                    << " sets key " << output.row_ << "," << output.col_ << " down but it is already down"
-                    << "\noutput_matrix:\n" << strMatrix(output_matrix_);
-                output_matrix_[output.row_] |= (1U << output.col_);
-                break;
-
-            case UP:
-                ASSERT_EQ(!!(output_matrix_[output.row_] & (1U << output.col_)), true)
-                    << "Test output at " << strTime(extra_iterations, auto_advance_time)
-                    << " sets key " << output.row_ << "," << output.col_ << " up but it is already up"
-                    << "\noutput_matrix:\n" << strMatrix(output_matrix_);
-                output_matrix_[output.row_] &= ~(1U << output.col_);
-                break;
-            }
+            matrixUpdate(output_matrix_, "output", output);
         }
 
         /* Check output matrix has expected change events */
         for (auto &output : event.outputs_) {
-            switch (output.direction_) {
-            case DOWN:
-                EXPECT_EQ(!!(cooked_matrix[output.row_] & (1U << output.col_)), true)
-                    << "Missing event at " << strTime(extra_iterations, auto_advance_time)
-                    << " expected key " << output.row_ << "," << output.col_ << " down"
+            EXPECT_EQ(!!(cooked_matrix_[output.row_] & (1U << output.col_)), directionValue(output.direction_))
+                    << "Missing event at " << strTime()
+                    << " expected key " << output.row_ << "," << output.col_ << " " << directionLabel(output.direction_)
                     << "\ninput_matrix: changed=" << !event.inputs_.empty() << "\n" << strMatrix(input_matrix_)
                     << "\nexpected_matrix:\n" << strMatrix(output_matrix_)
-                    << "\nactual_matrix:\n" << strMatrix(cooked_matrix);
-                break;
-
-            case UP:
-                EXPECT_EQ(!!(cooked_matrix[output.row_] & (1U << output.col_)), false)
-                    << "Missing event at " << strTime(extra_iterations, auto_advance_time)
-                    << " expected key " << output.row_ << "," << output.col_ << " up"
-                    << "\ninput_matrix: changed=" << !event.inputs_.empty() << "\n" << strMatrix(input_matrix_)
-                    << "\nexpected_matrix:\n" << strMatrix(output_matrix_)
-                    << "\nactual_matrix:\n" << strMatrix(cooked_matrix);
-                break;
-            }
+                    << "\nactual_matrix:\n" << strMatrix(cooked_matrix_);
         }
 
         /* Check output matrix has no other changes */
-        if (!std::equal(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix))) {
-            FAIL() << "Unexpected event: debounce() cooked matrix does not match expected output matrix"
-                << " at " << strTime(extra_iterations, auto_advance_time)
-                << "\ninput_matrix: changed=" << !event.inputs_.empty() << "\n" << strMatrix(input_matrix_)
-                << "\nexpected_matrix:\n" << strMatrix(output_matrix_)
-                << "\nactual_matrix:\n" << strMatrix(cooked_matrix);
-        }
+        checkCookedMatrix(!event.inputs_.empty(), "debounce() cooked matrix does not match expected output matrix");
 
         /* Perform some extra iterations of the matrix scan with no changes */
-        for (int i = 0; i < extra_iterations; i++) {
-            std::copy(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix));
-            std::copy(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix));
-
-            debounce(raw_matrix, cooked_matrix, MATRIX_ROWS, false);
-
-            if (!std::equal(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix))) {
-                FAIL() << "Fatal error: debounce() modified raw matrix at " << strTime(extra_iterations, auto_advance_time)
-                    << " extra iteration " << i << " of " << extra_iterations
-                    << "\ninput_matrix: changed=false\n" << strMatrix(input_matrix_)
-                    << "\nraw_matrix:\n" << strMatrix(raw_matrix);
-            }
-
-            if (!std::equal(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix))) {
-                FAIL() << "Unexpected event: debounce() modified cooked matrix at " << strTime(extra_iterations, auto_advance_time)
-                << " extra iteration " << i << " of " << extra_iterations
-                << "\ninput_matrix: changed=false\n" << strMatrix(input_matrix_)
-                << "\nexpected_matrix:\n" << strMatrix(output_matrix_)
-                << "\nactual_matrix:\n" << strMatrix(cooked_matrix);
-            }
+        for (int i = 0; i < extra_iterations_; i++) {
+            runDebounce(false);
+            checkCookedMatrix(false, "debounce() modified cooked matrix");
         }
     }
 
     /* Check that no further changes happen for 1 minute */
     for (int i = 0; i < 60000; i++) {
-        matrix_row_t raw_matrix[MATRIX_ROWS];
-        matrix_row_t cooked_matrix[MATRIX_ROWS];
-
-        std::copy(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix));
-        std::copy(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix));
-
-        debounce(raw_matrix, cooked_matrix, MATRIX_ROWS, false);
-
-        if (!std::equal(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix))) {
-            FAIL() << "Fatal error: debounce() modified raw matrix at " << strTime(extra_iterations, auto_advance_time)
-                << "\ninput_matrix: changed=false\n" << strMatrix(input_matrix_)
-                << "\nraw_matrix:\n" << strMatrix(raw_matrix);
-        }
-
-        if (!std::equal(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix))) {
-            FAIL() << "Unexpected event: debounce() modified cooked matrix at " << strTime(extra_iterations, auto_advance_time)
-                << "\ninput_matrix: changed=false\n" << strMatrix(input_matrix_)
-                << "\nexpected_matrix:\n" << strMatrix(output_matrix_)
-                << "\nactual_matrix:\n" << strMatrix(cooked_matrix);
-        }
-
+        runDebounce(false);
+        checkCookedMatrix(false, "debounce() modified cooked matrix");
         advance_time(1);
     }
 }
 
-std::string DebounceTest::strTime(int extra_iterations, bool auto_advance_time) {
+void DebounceTest::runDebounce(bool changed) {
+    std::copy(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix_));
+    std::copy(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix_));
+
+    debounce(raw_matrix_, cooked_matrix_, MATRIX_ROWS, changed);
+
+    if (!std::equal(std::begin(input_matrix_), std::end(input_matrix_), std::begin(raw_matrix_))) {
+        FAIL() << "Fatal error: debounce() modified raw matrix at " << strTime()
+            << "\ninput_matrix: changed=" << changed << "\n" << strMatrix(input_matrix_)
+            << "\nraw_matrix:\n" << strMatrix(raw_matrix_);
+    }
+}
+
+void DebounceTest::checkCookedMatrix(bool changed, const std::string &error_message) {
+    if (!std::equal(std::begin(output_matrix_), std::end(output_matrix_), std::begin(cooked_matrix_))) {
+        FAIL() << "Unexpected event: " << error_message << " at " << strTime()
+            << "\ninput_matrix: changed=" << changed << "\n" << strMatrix(input_matrix_)
+            << "\nexpected_matrix:\n" << strMatrix(output_matrix_)
+            << "\nactual_matrix:\n" << strMatrix(cooked_matrix_);
+    }
+}
+
+std::string DebounceTest::strTime() {
     std::stringstream text;
 
     text << "time " << (timer_read_fast() - time_offset_)
-        << " (extra_iterations=" << extra_iterations
-        << ", auto_advance_time=" << auto_advance_time << ")";
+        << " (extra_iterations=" << extra_iterations_
+        << ", auto_advance_time=" << auto_advance_time_ << ")";
 
     return text.str();
 }
@@ -268,6 +179,45 @@ std::string DebounceTest::strMatrix(matrix_row_t matrix[]) {
     }
 
     return text.str();
+}
+
+bool DebounceTest::directionValue(Direction direction) {
+    switch (direction) {
+    case DOWN:
+        return true;
+
+    case UP:
+        return false;
+    }
+}
+
+std::string DebounceTest::directionLabel(Direction direction) {
+    switch (direction) {
+    case DOWN:
+        return "DOWN";
+
+    case UP:
+        return "UP";
+    }
+}
+
+/* Modify a matrix and verify that events always specify a change */
+void DebounceTest::matrixUpdate(matrix_row_t matrix[], const std::string &name, const MatrixTestEvent &event) {
+    ASSERT_NE(!!(matrix[event.row_] & (1U << event.col_)), directionValue(event.direction_))
+        << "Test " << name << " at " << strTime()
+        << " sets key " << event.row_ << "," << event.col_ << " " << directionLabel(event.direction_)
+        << " but it is already " << directionLabel(event.direction_)
+        << "\n" << name << "_matrix:\n" << strMatrix(matrix);
+
+    switch (event.direction_) {
+    case DOWN:
+        matrix[event.row_] |= (1U << event.col_);
+        break;
+
+    case UP:
+        matrix[event.row_] &= ~(1U << event.col_);
+        break;
+    }
 }
 
 DebounceTestEvent::DebounceTestEvent(fast_timer_t time,

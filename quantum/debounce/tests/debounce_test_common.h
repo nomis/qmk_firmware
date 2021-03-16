@@ -62,13 +62,24 @@ protected:
     bool time_jumps_ = false;
 
 private:
-    void runEventsInternal(int extra_iterations, bool auto_advance_time);
+    static bool directionValue(Direction direction);
+    static std::string directionLabel(Direction direction);
 
-    std::string strTime(int extra_iterations, bool auto_advance_time);
+    void runEventsInternal();
+    void runDebounce(bool changed);
+    void checkCookedMatrix(bool changed, const std::string &error_message);
+    void matrixUpdate(matrix_row_t matrix[], const std::string &name, const MatrixTestEvent &event);
+
+    std::string strTime();
     std::string strMatrix(matrix_row_t matrix[]);
 
     std::list<DebounceTestEvent> events_;
 
     matrix_row_t input_matrix_[MATRIX_ROWS];
+    matrix_row_t raw_matrix_[MATRIX_ROWS];
+    matrix_row_t cooked_matrix_[MATRIX_ROWS];
     matrix_row_t output_matrix_[MATRIX_ROWS];
+
+    int extra_iterations_;
+    bool auto_advance_time_;
 };
