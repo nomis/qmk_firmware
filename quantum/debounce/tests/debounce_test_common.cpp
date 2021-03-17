@@ -31,10 +31,6 @@ void set_time(uint32_t t);
 void advance_time(uint32_t ms);
 }
 
-void DebounceTest::SetUp() {
-    debounce_init(MATRIX_ROWS);
-}
-
 void DebounceTest::addEvents(std::initializer_list<DebounceTestEvent> events) {
     events_.insert(events_.end(), events.begin(), events.end());
 }
@@ -61,7 +57,7 @@ void DebounceTest::runEventsInternal() {
     bool first = true;
 
     /* Initialise keyboard with start time (offset to avoid testing at 0) and all keys UP */
-    SetUp();
+    debounce_init(MATRIX_ROWS);
     set_time(time_offset_);
     std::fill(std::begin(input_matrix_), std::end(input_matrix_), 0);
     std::fill(std::begin(output_matrix_), std::end(output_matrix_), 0);
@@ -126,6 +122,8 @@ void DebounceTest::runEventsInternal() {
         checkCookedMatrix(false, "debounce() modified cooked matrix");
         advance_time(1);
     }
+
+    debounce_free();
 }
 
 void DebounceTest::runDebounce(bool changed) {

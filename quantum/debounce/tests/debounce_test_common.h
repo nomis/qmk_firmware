@@ -53,8 +53,6 @@ public:
 
 class DebounceTest : public ::testing::Test {
 protected:
-    void SetUp() override;
-
     void addEvents(std::initializer_list<DebounceTestEvent> events);
     void runEvents();
 

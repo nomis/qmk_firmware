@@ -56,13 +56,14 @@ static void transfer_matrix_values(matrix_row_t raw[], matrix_row_t cooked[], ui
 
 // we use num_rows rather than MATRIX_ROWS to support split keyboards
 void debounce_init(uint8_t num_rows) {
-#ifdef UNIT_TEST
-    free(debounce_counters);
-#endif
     debounce_counters = (debounce_counter_t *)malloc(num_rows * sizeof(debounce_counter_t));
     for (uint8_t r = 0; r < num_rows; r++) {
         debounce_counters[r] = DEBOUNCE_ELAPSED;
     }
+}
+
+void debounce_free(void) {
+    free(debounce_counters);
 }
 
 void debounce(matrix_row_t raw[], matrix_row_t cooked[], uint8_t num_rows, bool changed) {

@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-DEBOUNCE_COMMON_DEFS := -DUNIT_TEST -DMATRIX_ROWS=4 -DMATRIX_COLS=10 -DDEBOUNCE=5
+DEBOUNCE_COMMON_DEFS := -DMATRIX_ROWS=4 -DMATRIX_COLS=10 -DDEBOUNCE=5
 
 DEBOUNCE_COMMON_SRC := $(QUANTUM_PATH)/debounce/tests/debounce_test_common.cpp \
 	$(TMK_PATH)/common/test/timer.c
