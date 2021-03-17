@@ -59,6 +59,8 @@ fast_timer_t inline timer_elapsed_fast(fast_timer_t last) { return timer_elapsed
 #endif
 
 #if defined(PROTOCOL_CHIBIOS) && defined(WAIT_US_TIMER)
+#include <ch.h>
+#include <hal.h>
 void timer_wait_us(gptcnt_t duration);
 #endif
 
