@@ -48,3 +48,4 @@
 #define LED_PIN_ON_STATE    0
 
 /* Original hardware "reset" button on pin D2 */
+#define HARDWARE_RESET_PIN  D2
