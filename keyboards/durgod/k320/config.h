@@ -52,4 +52,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define LED_MR_LOCK_PIN     A10
 #define LED_PIN_ON_STATE    0
 
+/* Original hardware "reset" button on pin D2 */
+#define HARDWARE_RESET_PIN  D2
+
 #define WAIT_US_TIMER       GPTD3

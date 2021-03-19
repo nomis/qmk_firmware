@@ -15,6 +15,8 @@
  */
 
 #include "k320.h"
+#include <ch.h>
+#include <hal.h>
 
 /* Private Functions */
 void off_all_leds(void) {
@@ -40,3 +42,20 @@ void led_init_ports(void) {
     off_all_leds();
 }
 
+#ifndef HW_RESET_PIN_DISABLED
+static void hardware_reset_cb(void *arg) {
+    chSysLockFromISR();
+    bootloader_jump();
+    chSysUnlockFromISR();
+}
+#endif
+
+void keyboard_pre_init_kb(void) {
+    setPinInputHigh(HARDWARE_RESET_PIN);
+
+#ifndef HW_RESET_PIN_DISABLED
+    /* Jump to bootloader when the hardware reset button is pressed */
+    palEnablePadEvent(PAL_PORT(HARDWARE_RESET_PIN), PAL_PAD(HARDWARE_RESET_PIN), PAL_EVENT_MODE_FALLING_EDGE);
+    palSetPadCallback(PAL_PORT(HARDWARE_RESET_PIN), PAL_PAD(HARDWARE_RESET_PIN), hardware_reset_cb, NULL);
+#endif
+}
