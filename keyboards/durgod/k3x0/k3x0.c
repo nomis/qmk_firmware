@@ -1,4 +1,5 @@
 /* Copyright 2021 Don Kjer and Tyler Tidman
+ * Copyright 2021 Simon Arlott
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +19,9 @@
 
 /* Private Functions */
 void off_all_leds(void) {
+#ifdef LED_NUM_LOCK_PIN
     writePinHigh(LED_NUM_LOCK_PIN);
+#endif
     writePinHigh(LED_CAPS_LOCK_PIN);
     writePinHigh(LED_SCROLL_LOCK_PIN);
     writePinHigh(LED_WIN_LOCK_PIN);
@@ -26,7 +29,9 @@ void off_all_leds(void) {
 }
 
 void on_all_leds(void) {
+#ifdef LED_NUM_LOCK_PIN
     writePinLow(LED_NUM_LOCK_PIN);
+#endif
     writePinLow(LED_CAPS_LOCK_PIN);
     writePinLow(LED_SCROLL_LOCK_PIN);
     writePinLow(LED_WIN_LOCK_PIN);
@@ -35,7 +40,9 @@ void on_all_leds(void) {
 
 /* WinLock and MR LEDs are non-standard. Need to override led init */
 void led_init_ports(void) {
+#ifdef LED_NUM_LOCK_PIN
     setPinOutput(LED_NUM_LOCK_PIN);
+#endif
     setPinOutput(LED_CAPS_LOCK_PIN);
     setPinOutput(LED_SCROLL_LOCK_PIN);
     setPinOutput(LED_WIN_LOCK_PIN);

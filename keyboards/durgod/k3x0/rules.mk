@@ -7,9 +7,6 @@ MCU = STM32F072
 
 BOARD = DURGOD_STM32_F070
 
-# Do not put the microcontroller into power saving mode
-OPT_DEFS += -DNO_SUSPEND_POWER_DOWN
-
 # Build Options
 #   change yes to no to disable
 #
@@ -26,5 +23,6 @@ BACKLIGHT_ENABLE = no       # Enable keyboard backlight functionality
 RGBLIGHT_ENABLE = no        # Enable keyboard RGB underglow
 BLUETOOTH_ENABLE = no       # Enable Bluetooth
 AUDIO_ENABLE = no           # Audio output
+LTO_ENABLE = yes
 
 LAYOUTS = fullsize_ansi fullsize_iso tkl_ansi tkl_iso
