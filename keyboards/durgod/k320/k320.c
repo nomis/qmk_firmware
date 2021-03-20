@@ -57,5 +57,10 @@ void keyboard_pre_init_kb(void) {
     /* Jump to bootloader when the hardware reset button is pressed */
     palEnablePadEvent(PAL_PORT(HARDWARE_RESET_PIN), PAL_PAD(HARDWARE_RESET_PIN), PAL_EVENT_MODE_FALLING_EDGE);
     palSetPadCallback(PAL_PORT(HARDWARE_RESET_PIN), PAL_PAD(HARDWARE_RESET_PIN), hardware_reset_cb, NULL);
+
+    /* The interrupt is edge-triggered so check that it's not already pressed */
+    if (!readPin(HARDWARE_RESET_PIN)) {
+        bootloader_jump();
+    }
 #endif
 }
