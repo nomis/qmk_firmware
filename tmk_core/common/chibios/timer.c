@@ -10,13 +10,13 @@ static uint32_t overflow     = 0;
 #endif
 
 #ifdef WAIT_US_TIMER
-static thread_t *main_thread = NULL;
-static const GPTConfig gpt_cfg = { 100000, NULL, 0, 0 }; /* 1MHz timer, no callback */
+//static thread_t *main_thread = NULL;
+static const GPTConfig gpt_cfg = { 1000000, NULL, 0, 0 }; /* 1MHz timer, no callback */
 #endif
 
 void timer_init(void) {
 #ifdef WAIT_US_TIMER
-    main_thread = chThdGetSelfX();
+    //main_thread = chThdGetSelfX();
 #endif
 
     timer_clear();
@@ -64,7 +64,7 @@ void timer_wait_us(gptcnt_t duration) {
      * Only use this timer on the main thread;
      * other threads need to use their own timer.
      */
-    if (chThdGetSelfX() == main_thread) {
+    if (chThdGetSelfX() == &ch.mainthread) {
         gptStart(&WAIT_US_TIMER, &gpt_cfg);
         gptPolledDelay(&WAIT_US_TIMER, duration);
     } else {
