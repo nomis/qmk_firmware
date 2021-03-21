@@ -7,3 +7,4 @@
 #define PRODUCT_ID     0x0001
 
 #define DYNAMIC_MACRO_NO_NESTING
+#define WINLOCK_DISABLED

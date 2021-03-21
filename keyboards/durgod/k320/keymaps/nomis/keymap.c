@@ -24,11 +24,8 @@ enum my_layers {
 	L_FUNC,
 };
 
-static bool win_key_locked = false;
-
 enum custom_keycodes {
-	CK_TGUI = SAFE_RANGE,   // Toggle between GUI Lock or Unlock
-	CK_PAUS,                // KC_MPLY (or KC_PAUS when modifiers held)
+	CK_PAUS = SAFE_RANGE,   // KC_MPLY (or KC_PAUS when modifiers held)
 	CK_SLCK,                // KC_WHOM (or KC_SLCK when modifiers held)
 	CK_RATE,
 	CK_STRF,
@@ -114,7 +111,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		_______,  _______,  KC_WAKE,  CK_STRE,  _______,  CK_STRT,  CK_STRY,  _______,  _______,  _______,  CK_STRP,  _______,  _______,            DM_PLY2,  KC_MUTE,  KC_VOLD,
 		TG(L_OSM),CK_STRA,  KC_SLEP,  _______,  CK_STRF,  _______,  _______,  _______,  _______,  CK_STRL,  _______,  _______,  _______,  CK_RATE,
 		_______,  _______,  _______,  _______,  KC_CALC,  _______,  _______,  CK_STRN,  _______,  _______,  _______,  _______,            _______,            _______,
-		_______,  CK_TGUI,  _______,                                _______,                                _______,  KC_APP,   _______,  _______,  KC_MPRV,  _______,  KC_MNXT
+		_______,  _______,  _______,                                _______,                                _______,  KC_APP,   _______,  _______,  KC_MPRV,  _______,  KC_MNXT
 	),
 #if 0
 	/* Keymap L_EMPTY: Empty Layer
@@ -160,18 +157,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 	action_t action;
 
 	switch (keycode) {
-		case CK_TGUI:
-			if (!record->event.pressed) {
-				// Toggle GUI lock on key release
-				win_key_locked = !win_key_locked;
-				writePin(LED_WIN_LOCK_PIN, !win_key_locked);
-			}
-			break;
-		case KC_LGUI:
-		case KC_RGUI:
-			if (win_key_locked) { return false; }
-			break;
-
 		case CK_PAUS:
 			if (record->event.pressed) {
 				if (get_mods() & MOD_MASK_CSAG) {
