@@ -16,6 +16,8 @@
 #include QMK_KEYBOARD_H
 
 #include <stdio.h>
+#include <string.h>
+#include "raw_hid.h"
 #include "strings.c"
 
 enum my_layers {
@@ -151,6 +153,9 @@ uint32_t layer_state_set_user(uint32_t state) {
 	return state;
 }
 
+static uint8_t raw_data[64];
+static uint8_t raw_length = 0;
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 	static uint16_t paus_keycode = KC_NO;
 	static uint16_t srch_keycode = KC_NO;
@@ -182,19 +187,27 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 			action.code = ACTION_KEY(srch_keycode);
 			process_action(record, action);
 			return false;
-
-		case CK_RATE:
-			if (record->event.pressed) {
-				char scan_rate[15];
-				snprintf(scan_rate, sizeof(scan_rate), " %lu", get_matrix_scan_rate());
-				send_string(scan_rate);
-				SEND_STRING(SS_TAP(X_ENTER));
-			}
-			return false;
 	}
 
 	if (record->event.pressed) {
 		switch (keycode) {
+		case CK_RATE:
+			{
+				char scan_rate[15];
+				snprintf(scan_rate, sizeof(scan_rate), " %lu", get_matrix_scan_rate());
+				send_string(scan_rate);
+				SEND_STRING(SS_TAP(X_ENTER));
+
+				char tmp[4];
+				for (int i = 0; i < raw_length; i++) {
+					snprintf(tmp, sizeof(tmp), " %02X", raw_data[i]);
+					send_string(tmp);
+				}
+				SEND_STRING(SS_TAP(X_ENTER));
+				raw_length = 0;
+			}
+			return false;
+
 		case CK_STRF:
 			SEND_STRING(STR_F);
 			break;
@@ -237,4 +250,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 		}
 	}
 	return true;
+}
+
+void raw_hid_receive(uint8_t *data, uint8_t length) {
+	memcpy(raw_data, data, length);
+	raw_length = length;
 }
