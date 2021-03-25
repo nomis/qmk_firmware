@@ -15,6 +15,11 @@
  */
 #include QMK_KEYBOARD_H
 
+#include "raw_hid.h"
+#include "users/nomis/raw-identify.h"
+#include "users/nomis/unicode-input-mode.h"
+#include "users/nomis/usb-events.h"
+
 enum my_layers {
 	L_BASE,
 	L_TOP,
@@ -524,51 +529,115 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 #define BRIGHTNESS 128
-static const HSV red = { 0, 255, BRIGHTNESS };
-static const HSV orange = { 10, 255, BRIGHTNESS };
-static const HSV yellow = { 43, 255, BRIGHTNESS };
-static const HSV green = { 85, 255, BRIGHTNESS };
-static const HSV blue = { 170, 255, BRIGHTNESS };
-static const HSV light_blue = { 145, 255, BRIGHTNESS };
-static const HSV cyan = { 128, 255, BRIGHTNESS };
-static const HSV purple = { 191, 255, BRIGHTNESS };
-static const HSV white = { 0, 0, BRIGHTNESS };
-static const HSV grey = { 0, 0, BRIGHTNESS/2 };
-static const HSV black = { HSV_BLACK };
+#undef HSV_ORANGE
+#define HSV_ORANGE           10, 255, 255
+#define HSV_LIGHT_BLUE      145, 255, 255
+#define HSV_MID_BLUE1       153, 255, 255
+#define HSV_MID_BLUE2       162, 255, 255
+#define HSV_GREY              0,   0, BRIGHTNESS/2
 
-static void led_sethsv(HSV hsv) {
-	rgblight_sethsv_noeeprom(hsv.h, hsv.s, hsv.v);
+#define HSV_DIM(x) x*0 + BRIGHTNESS
+#define R_OS_DEFAULT 0
+static const rgblight_segment_t PROGMEM os_default_layer[] = RGBLIGHT_LAYER_SEGMENTS({0, RGBLED_NUM, HSV_DIM(HSV_WHITE)});
+#define R_OS_LINUX 1
+static const rgblight_segment_t PROGMEM os_linux_layer[] = RGBLIGHT_LAYER_SEGMENTS({0, RGBLED_NUM, HSV_DIM(HSV_YELLOW)});
+#define R_OS_WINDOWS 2
+static const rgblight_segment_t PROGMEM os_windows_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+	{0, 1, HSV_DIM(HSV_MID_BLUE1)},
+	{1, 1, HSV_DIM(HSV_LIGHT_BLUE)},
+	{2, 1, HSV_DIM(HSV_MID_BLUE1)},
+	{3, 1, HSV_DIM(HSV_MID_BLUE2)},
+	{4, 1, HSV_DIM(HSV_BLUE)},
+	{5, 1, HSV_DIM(HSV_MID_BLUE2)}
+);
+#define R_OS_APPLE 3
+static const rgblight_segment_t PROGMEM os_apple_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+	{0, 1, HSV_DIM(HSV_GREEN)},
+	{1, 1, HSV_DIM(HSV_YELLOW)},
+	{2, 1, HSV_DIM(HSV_ORANGE)},
+	{3, 1, HSV_DIM(HSV_RED)},
+	{4, 1, HSV_DIM(HSV_PURPLE)},
+	{5, 1, HSV_DIM(HSV_LIGHT_BLUE)}
+);
+
+static const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
+	[R_OS_DEFAULT] = os_default_layer,
+	[R_OS_LINUX] = os_linux_layer,
+	[R_OS_WINDOWS] = os_windows_layer,
+	[R_OS_APPLE] = os_apple_layer
+);
+
+static inline void led_sethsv(uint16_t hue, uint8_t sat, uint8_t val) {
+	rgblight_sethsv_noeeprom(hue, sat, val == 255 ? BRIGHTNESS : val);
 }
 
-static void led_sethsv_at(HSV hsv, uint8_t idx) {
-	sethsv(hsv.h, hsv.s, hsv.v, (LED_TYPE *)&led[idx]);
+static inline void led_sethsv_at(uint16_t hue, uint8_t sat, uint8_t val, uint8_t idx) {
+	sethsv(hue, sat, val == 255 ? BRIGHTNESS : val, (LED_TYPE *)&led[idx]);
 }
 
-static bool led_hsv_eq(HSV hsv1, HSV hsv2) {
-	return hsv1.h == hsv2.h
-		&& hsv1.s == hsv2.s
-		&& hsv1.v == hsv2.v;
+static bool led_hsv_eq(HSV hsv1, uint16_t hue2, uint8_t sat2, uint8_t val2) {
+	return hsv1.h == hue2
+		&& hsv1.s == sat2
+		&& hsv1.v == val2;
+}
+
+static void raw_identify_user(enum raw_identify id) {
+	switch (id) {
+	case ID_LINUX:
+		set_unicode_input_mode_noeeprom(UC_LNX);
+		rgblight_blink_layer(R_OS_LINUX, 1000);
+		break;
+
+	case ID_WINDOWS:
+		set_unicode_input_mode_noeeprom(UC_WINC);
+		rgblight_blink_layer(R_OS_WINDOWS, 1000);
+		break;
+
+	case ID_APPLE:
+		set_unicode_input_mode_noeeprom(UC_MAC);
+		rgblight_blink_layer(R_OS_APPLE, 1000);
+		break;
+
+	default:
+		set_unicode_input_mode_noeeprom(UC_LNX);
+		rgblight_blink_layer(R_OS_DEFAULT, 1000);
+		break;
+	}
+}
+
+static void usb_event_user(enum usb_event event) {
+	switch (event) {
+	case USB_EVT_CONNECTED:
+		rgblight_blink_layer(R_OS_DEFAULT, 1000);
+		break;
+
+	case USB_EVT_DISCONNECTED:
+		set_unicode_input_mode_noeeprom(UC_LNX);
+		break;
+
+	case USB_EVT_SUSPENDED:
+		break;
+	}
 }
 
 void keyboard_post_init_user(void) {
-	if (!rgblight_is_enabled() || rgblight_get_mode() != RGBLIGHT_MODE_STATIC_LIGHT || !led_hsv_eq(rgblight_get_hsv(), black)) {
+	if (!rgblight_is_enabled() || rgblight_get_mode() != RGBLIGHT_MODE_STATIC_LIGHT || !led_hsv_eq(rgblight_get_hsv(), HSV_BLACK)) {
 		rgblight_enable_noeeprom();
 		rgblight_mode_noeeprom(RGBLIGHT_MODE_STATIC_LIGHT);
 		rgblight_sethsv(HSV_BLACK);
-		led_sethsv(cyan);
+		led_sethsv(HSV_CYAN);
 		wait_ms(1000);
 	}
 
 	if (is_backlight_enabled()) {
 		backlight_disable();
 		eeconfig_update_backlight_current();
-		led_sethsv(cyan);
+		led_sethsv(HSV_CYAN);
 		wait_ms(1000);
 	}
 
-	led_sethsv(white);
-	wait_ms(500);
-	led_sethsv(black);
+	rgblight_layers = my_rgb_layers;
+	raw_identify_user(ID_DEFAULT);
 }
 
 uint32_t layer_state_set_user(uint32_t state) {
@@ -591,76 +660,78 @@ uint32_t layer_state_set_user(uint32_t state) {
 	}
 
 	if (layers == 4) {
-		led_sethsv(green);
+		rgblight_layers = NULL;
+		led_sethsv(HSV_GREEN);
+		wait_ms(1);
 		reset_keyboard();
 	} else if (layers == 3) {
-		led_sethsv(red);
+		led_sethsv(HSV_RED);
 	} else if (layer_state_cmp(state, L_TOP_LEFT)) {
-		led_sethsv_at(red, 0);
-		led_sethsv_at(white, 1);
-		led_sethsv_at(black, 2);
-		led_sethsv_at(black, 3);
-		led_sethsv_at(black, 4);
-		led_sethsv_at(white, 5);
+		led_sethsv_at(HSV_RED, 0);
+		led_sethsv_at(HSV_WHITE, 1);
+		led_sethsv_at(HSV_BLACK, 2);
+		led_sethsv_at(HSV_BLACK, 3);
+		led_sethsv_at(HSV_BLACK, 4);
+		led_sethsv_at(HSV_WHITE, 5);
 		rgblight_set();
 	} else if (layer_state_cmp(state, L_TOP_RIGHT)) {
-		led_sethsv_at(white, 0);
-		led_sethsv_at(red, 1);
-		led_sethsv_at(white, 2);
-		led_sethsv_at(black, 3);
-		led_sethsv_at(black, 4);
-		led_sethsv_at(black, 5);
+		led_sethsv_at(HSV_WHITE, 0);
+		led_sethsv_at(HSV_RED, 1);
+		led_sethsv_at(HSV_WHITE, 2);
+		led_sethsv_at(HSV_BLACK, 3);
+		led_sethsv_at(HSV_BLACK, 4);
+		led_sethsv_at(HSV_BLACK, 5);
 		rgblight_set();
 	} else if (layer_state_cmp(state, L_BOTTOM_LEFT)) {
-		led_sethsv_at(black, 0);
-		led_sethsv_at(black, 1);
-		led_sethsv_at(black, 2);
-		led_sethsv_at(white, 3);
-		led_sethsv_at(red, 4);
-		led_sethsv_at(white, 5);
+		led_sethsv_at(HSV_BLACK, 0);
+		led_sethsv_at(HSV_BLACK, 1);
+		led_sethsv_at(HSV_BLACK, 2);
+		led_sethsv_at(HSV_WHITE, 3);
+		led_sethsv_at(HSV_RED, 4);
+		led_sethsv_at(HSV_WHITE, 5);
 		rgblight_set();
 	} else if (layer_state_cmp(state, L_BOTTOM_RIGHT)) {
-		led_sethsv_at(black, 0);
-		led_sethsv_at(black, 1);
-		led_sethsv_at(white, 2);
-		led_sethsv_at(red, 3);
-		led_sethsv_at(white, 4);
-		led_sethsv_at(black, 5);
+		led_sethsv_at(HSV_BLACK, 0);
+		led_sethsv_at(HSV_BLACK, 1);
+		led_sethsv_at(HSV_WHITE, 2);
+		led_sethsv_at(HSV_RED, 3);
+		led_sethsv_at(HSV_WHITE, 4);
+		led_sethsv_at(HSV_BLACK, 5);
 		rgblight_set();
 	} else if (layer_state_cmp(state, L_TOP)) {
-		led_sethsv_at(white, 0);
-		led_sethsv_at(white, 1);
-		led_sethsv_at(black, 2);
-		led_sethsv_at(black, 3);
-		led_sethsv_at(black, 4);
-		led_sethsv_at(black, 5);
+		led_sethsv_at(HSV_WHITE, 0);
+		led_sethsv_at(HSV_WHITE, 1);
+		led_sethsv_at(HSV_BLACK, 2);
+		led_sethsv_at(HSV_BLACK, 3);
+		led_sethsv_at(HSV_BLACK, 4);
+		led_sethsv_at(HSV_BLACK, 5);
 		rgblight_set();
 	} else if (layer_state_cmp(state, L_LEFT)) {
-		led_sethsv_at(white, 0);
-		led_sethsv_at(black, 1);
-		led_sethsv_at(black, 2);
-		led_sethsv_at(black, 3);
-		led_sethsv_at(white, 4);
-		led_sethsv_at(white, 5);
+		led_sethsv_at(HSV_WHITE, 0);
+		led_sethsv_at(HSV_BLACK, 1);
+		led_sethsv_at(HSV_BLACK, 2);
+		led_sethsv_at(HSV_BLACK, 3);
+		led_sethsv_at(HSV_WHITE, 4);
+		led_sethsv_at(HSV_WHITE, 5);
 		rgblight_set();
 	} else if (layer_state_cmp(state, L_RIGHT)) {
-		led_sethsv_at(black, 0);
-		led_sethsv_at(white, 1);
-		led_sethsv_at(white, 2);
-		led_sethsv_at(white, 3);
-		led_sethsv_at(black, 4);
-		led_sethsv_at(black, 5);
+		led_sethsv_at(HSV_BLACK, 0);
+		led_sethsv_at(HSV_WHITE, 1);
+		led_sethsv_at(HSV_WHITE, 2);
+		led_sethsv_at(HSV_WHITE, 3);
+		led_sethsv_at(HSV_BLACK, 4);
+		led_sethsv_at(HSV_BLACK, 5);
 		rgblight_set();
 	} else if (layer_state_cmp(state, L_BOTTOM)) {
-		led_sethsv_at(black, 0);
-		led_sethsv_at(black, 1);
-		led_sethsv_at(black, 2);
-		led_sethsv_at(white, 3);
-		led_sethsv_at(white, 4);
-		led_sethsv_at(black, 5);
+		led_sethsv_at(HSV_BLACK, 0);
+		led_sethsv_at(HSV_BLACK, 1);
+		led_sethsv_at(HSV_BLACK, 2);
+		led_sethsv_at(HSV_WHITE, 3);
+		led_sethsv_at(HSV_WHITE, 4);
+		led_sethsv_at(HSV_BLACK, 5);
 		rgblight_set();
 	} else {
-		led_sethsv(black);
+		led_sethsv(HSV_BLACK);
 	}
 
 	return state;
@@ -671,39 +742,39 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 		switch (keycode) {
 		case LCTL(LSFT(KC_M)):
 		case LCTL(LSFT(KC_O)):
-			led_sethsv(purple);
+			led_sethsv(HSV_PURPLE);
 			break;
 
 		case LALT(KC_V):
 		case LALT(KC_A):
-			led_sethsv(light_blue);
+			led_sethsv(HSV_LIGHT_BLUE);
 			break;
 
 		case LCTL(KC_X):
 		case LSFT(KC_DEL):
-			led_sethsv(grey);
+			led_sethsv(HSV_GREY);
 			break;
 
 		case LCTL(KC_C):
 		case LCTL(KC_INS):
-			led_sethsv(blue);
+			led_sethsv(HSV_BLUE);
 			break;
 
 		case LCTL(KC_V):
 		case LSFT(KC_INS):
-			led_sethsv(yellow);
+			led_sethsv(HSV_CORAL);
 			break;
 
 		case CK_OS:
-			switch(get_unicode_input_mode()) {
-			case UC_LNX:
-				set_unicode_input_mode(UC_WINC);
-				led_sethsv(blue);
+			switch (get_unicode_input_mode()) {
+			case UC_WINC:
+				set_unicode_input_mode_noeeprom(UC_LNX);
+				led_sethsv(HSV_ORANGE);
 				break;
 
-			case UC_WINC:
-				set_unicode_input_mode(UC_LNX);
-				led_sethsv(orange);
+			default:
+				set_unicode_input_mode_noeeprom(UC_WINC);
+				led_sethsv(HSV_BLUE);
 				break;
 			}
 			break;
@@ -711,21 +782,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 		case CK_CLIP:
 			if (layer_state_is(L_ALT_CLIPBOARD)) {
 				layer_off(L_ALT_CLIPBOARD);
-				led_sethsv_at(green, 0);
-				led_sethsv_at(black, 1);
-				led_sethsv_at(black, 2);
-				led_sethsv_at(black, 3);
-				led_sethsv_at(green, 4);
-				led_sethsv_at(green, 5);
+				led_sethsv_at(HSV_GREEN, 0);
+				led_sethsv_at(HSV_BLACK, 1);
+				led_sethsv_at(HSV_BLACK, 2);
+				led_sethsv_at(HSV_BLACK, 3);
+				led_sethsv_at(HSV_GREEN, 4);
+				led_sethsv_at(HSV_GREEN, 5);
 				rgblight_set();
 			} else {
 				layer_on(L_ALT_CLIPBOARD);
-				led_sethsv_at(black, 0);
-				led_sethsv_at(red, 1);
-				led_sethsv_at(red, 2);
-				led_sethsv_at(red, 3);
-				led_sethsv_at(black, 4);
-				led_sethsv_at(black, 5);
+				led_sethsv_at(HSV_BLACK, 0);
+				led_sethsv_at(HSV_RED, 1);
+				led_sethsv_at(HSV_RED, 2);
+				led_sethsv_at(HSV_RED, 3);
+				led_sethsv_at(HSV_BLACK, 4);
+				led_sethsv_at(HSV_BLACK, 5);
 				rgblight_set();
 			}
 			break;
@@ -744,7 +815,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 		case LSFT(KC_INS):
 		case CK_OS:
 		case CK_CLIP:
-			led_sethsv(black);
+			led_sethsv(HSV_BLACK);
 			break;
 		}
 	}
@@ -797,4 +868,12 @@ void post_process_record_user(uint16_t keycode, keyrecord_t *record) {
 			break;
 		}
 	}
+}
+
+void housekeeping_task_user(void) {
+	usb_event_check();
+}
+
+void raw_hid_receive(uint8_t *data, uint8_t length) {
+	raw_hid_receive_identify(data, length);
 }

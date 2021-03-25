@@ -2,3 +2,4 @@ DEBUG_MATRIX_SCAN_RATE_ENABLE = api
 DEBOUNCE_TYPE = asym_eager_defer_pk
 UNICODEMAP_ENABLE = yes
 LTO_ENABLE = yes
+RAW_ENABLE = yes
