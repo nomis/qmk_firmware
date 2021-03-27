@@ -136,13 +136,23 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 #define HSV_LIGHT_BLUE      145, 255, 255
 #define HSV_MID_BLUE1       153, 255, 255
 #define HSV_MID_BLUE2       162, 255, 255
+#define HSV_GREY              0,   0, BRIGHTNESS/2
 
 #define HSV_DIM(x) x*0 + BRIGHTNESS
-#define R_OS_DEFAULT 0
+#define R_OS_NONE 0
+static const rgblight_segment_t PROGMEM os_none_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+	{0, 1, HSV_DIM(HSV_CYAN)},
+	{1, 1, HSV_DIM(HSV_MAGENTA)},
+	{2, 1, HSV_GREY},
+	{3, 1, HSV_DIM(HSV_CYAN)},
+	{4, 1, HSV_DIM(HSV_MAGENTA)},
+	{5, 1, HSV_GREY}
+);
+#define R_OS_DEFAULT 1
 static const rgblight_segment_t PROGMEM os_default_layer[] = RGBLIGHT_LAYER_SEGMENTS({0, RGBLED_NUM, HSV_DIM(HSV_WHITE)});
-#define R_OS_LINUX 1
+#define R_OS_LINUX 2
 static const rgblight_segment_t PROGMEM os_linux_layer[] = RGBLIGHT_LAYER_SEGMENTS({0, RGBLED_NUM, HSV_DIM(HSV_YELLOW)});
-#define R_OS_WINDOWS 2
+#define R_OS_WINDOWS 3
 static const rgblight_segment_t PROGMEM os_windows_layer[] = RGBLIGHT_LAYER_SEGMENTS(
 	{0, 1, HSV_DIM(HSV_MID_BLUE1)},
 	{1, 1, HSV_DIM(HSV_LIGHT_BLUE)},
@@ -151,7 +161,7 @@ static const rgblight_segment_t PROGMEM os_windows_layer[] = RGBLIGHT_LAYER_SEGM
 	{4, 1, HSV_DIM(HSV_BLUE)},
 	{5, 1, HSV_DIM(HSV_MID_BLUE2)}
 );
-#define R_OS_APPLE 3
+#define R_OS_APPLE 4
 static const rgblight_segment_t PROGMEM os_apple_layer[] = RGBLIGHT_LAYER_SEGMENTS(
 	{0, 1, HSV_DIM(HSV_GREEN)},
 	{1, 1, HSV_DIM(HSV_YELLOW)},
@@ -162,6 +172,7 @@ static const rgblight_segment_t PROGMEM os_apple_layer[] = RGBLIGHT_LAYER_SEGMEN
 );
 
 static const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
+	[R_OS_NONE] = os_none_layer,
 	[R_OS_DEFAULT] = os_default_layer,
 	[R_OS_LINUX] = os_linux_layer,
 	[R_OS_WINDOWS] = os_windows_layer,
@@ -242,6 +253,7 @@ static void usb_event_user(enum usb_event event) {
 
 	case USB_EVT_DISCONNECTED:
 		//set_unicode_input_mode_noeeprom(UC_LNX);
+		rgblight_blink_layer(R_OS_NONE, 1000);
 		break;
 
 	case USB_EVT_SUSPENDED:
