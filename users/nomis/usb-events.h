@@ -36,13 +36,20 @@ static inline void usb_event_check(void);
 #    include <LUFA/Drivers/USB/USB.h>
 
 static inline void usb_event_check(void) {
-    static enum USB_Device_States_t previous_state = UINT8_MAX;
+    static enum USB_Device_States_t previous_state = ~0;
     enum USB_Device_States_t current_state = USB_DeviceState;
 
     if (previous_state != current_state) {
         switch (current_state) {
         case DEVICE_STATE_Unattached ... DEVICE_STATE_Addressed:
-            usb_event_user(USB_EVT_DISCONNECTED);
+            switch (previous_state) {
+            case DEVICE_STATE_Unattached ... DEVICE_STATE_Addressed:
+                /* Avoid sending multiple events */
+                break;
+
+            default:
+                usb_event_user(USB_EVT_DISCONNECTED);
+            }
             break;
 
         case DEVICE_STATE_Configured:
