@@ -161,7 +161,7 @@ static const rgblight_segment_t PROGMEM os_windows_layer[] = RGBLIGHT_LAYER_SEGM
 	{4, 1, HSV_DIM(HSV_BLUE)},
 	{5, 1, HSV_DIM(HSV_MID_BLUE2)}
 );
-#define R_OS_APPLE 4
+#define R_OS_MAC 4
 static const rgblight_segment_t PROGMEM os_apple_layer[] = RGBLIGHT_LAYER_SEGMENTS(
 	{0, 1, HSV_DIM(HSV_GREEN)},
 	{1, 1, HSV_DIM(HSV_YELLOW)},
@@ -176,7 +176,7 @@ static const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS
 	[R_OS_DEFAULT] = os_default_layer,
 	[R_OS_LINUX] = os_linux_layer,
 	[R_OS_WINDOWS] = os_windows_layer,
-	[R_OS_APPLE] = os_apple_layer
+	[R_OS_MAC] = os_apple_layer
 );
 
 static inline void led_sethsv(uint16_t hue, uint8_t sat, uint8_t val) {
@@ -221,38 +221,60 @@ static void update_auto_layer(void) {
 	}
 }
 
-static void raw_identify_user(enum raw_identify id) {
+static void set_os(enum raw_identify id) {
 	switch (id) {
 	case ID_LINUX:
 		//set_unicode_input_mode_noeeprom(UC_LNX);
-		rgblight_blink_layer(R_OS_LINUX, 1000);
 		break;
 
 	case ID_WINDOWS:
 		//set_unicode_input_mode_noeeprom(UC_WINC);
-		rgblight_blink_layer(R_OS_WINDOWS, 1000);
 		break;
 
-	case ID_APPLE:
+	case ID_MAC:
 		//set_unicode_input_mode_noeeprom(UC_MAC);
-		rgblight_blink_layer(R_OS_APPLE, 1000);
 		break;
 
 	default:
 		//set_unicode_input_mode_noeeprom(UC_LNX);
+		break;
+	}
+}
+
+static void blink_os(enum raw_identify id) {
+	switch (id) {
+	case ID_LINUX:
+		rgblight_blink_layer(R_OS_LINUX, 1000);
+		break;
+
+	case ID_WINDOWS:
+		rgblight_blink_layer(R_OS_WINDOWS, 1000);
+		break;
+
+	case ID_MAC:
+		rgblight_blink_layer(R_OS_MAC, 1000);
+		break;
+
+	default:
 		rgblight_blink_layer(R_OS_DEFAULT, 1000);
 		break;
 	}
 }
 
+
+static void raw_identify_user(enum raw_identify id) {
+	set_os(id);
+	blink_os(id);
+}
+
 static void usb_event_user(enum usb_event event) {
 	switch (event) {
 	case USB_EVT_CONNECTED:
-		rgblight_blink_layer(R_OS_DEFAULT, 1000);
+		blink_os(ID_DEFAULT);
 		break;
 
 	case USB_EVT_DISCONNECTED:
-		//set_unicode_input_mode_noeeprom(UC_LNX);
+		set_os(ID_DEFAULT);
 		rgblight_blink_layer(R_OS_NONE, 1000);
 		break;
 
@@ -278,7 +300,7 @@ void keyboard_post_init_user(void) {
 	}
 
 	rgblight_layers = my_rgb_layers;
-	raw_identify_user(ID_DEFAULT);
+	set_os(ID_DEFAULT);
 
 	num_lock = host_keyboard_led_state().num_lock;
 	real_layer = layer_state_is(L_REAL);
