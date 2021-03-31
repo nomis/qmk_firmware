@@ -26,7 +26,7 @@ enum raw_identify {
     ID_DEFAULT = 0x00000000,
     ID_LINUX   = 0x4C4E5800,
     ID_WINDOWS = 0x57494E00,
-    ID_APPLE   = 0x41504C00,
+    ID_MAC     = 0x4D414300,
     ID_BSD     = 0x42534400,
 };
 
