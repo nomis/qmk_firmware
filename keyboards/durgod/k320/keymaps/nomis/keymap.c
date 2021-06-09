@@ -209,42 +209,42 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 			return false;
 
 		case CK_STRF:
-			SEND_STRING(STR_F);
+			SEND_STRING_DELAY(STR_F, 5);
 			break;
 
 		case CK_STRL:
-			SEND_STRING(STR_L);
+			SEND_STRING_DELAY(STR_L, 5);
 			break;
 
 		case CK_STRN:
-			SEND_STRING(STR_N);
+			SEND_STRING_DELAY(STR_N, 5);
 			break;
 
 		case CK_STRE:
-			SEND_STRING(STR_E);
+			SEND_STRING_DELAY(STR_E, 5);
 			break;
 
 		case CK_STRA:
-			SEND_STRING(STR_A);
+			SEND_STRING_DELAY(STR_A, 5);
 			break;
 
 		case CK_STRT:
-			SEND_STRING(STR_T);
+			SEND_STRING_DELAY(STR_T, 5);
 			break;
 
 		case CK_STRY:
-			SEND_STRING(STR_Y);
+			SEND_STRING_DELAY(STR_Y, 5);
 			break;
 
 		case CK_STRP:
-			SEND_STRING(STR_P);
+			SEND_STRING_DELAY(STR_P, 5);
 			break;
 
 		case CK_9_0S:
 		case CK_6_0S:
 		case CK_3_0S:
 			for (uint8_t i = (keycode - CK_3_0S) + 1; i > 0; i--) {
-				SEND_STRING("000");
+				SEND_STRING_DELAY("000", 5);
 			}
 			return false;
 		}
