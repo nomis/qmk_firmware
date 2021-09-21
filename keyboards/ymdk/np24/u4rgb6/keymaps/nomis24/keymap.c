@@ -126,7 +126,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * |Alt Clip|  Cut   |  Copy  | Paste  |
 	 * | Layer  |  C-x   |  C-c   | C-v    |
 	 * |-----------------------------------|
-	 * |  Teams |  Teams |  Zoom  |  Zoom  |
+	 * |  Meet  |  Meet  |  Zoom  |  Zoom  |
 	 * | Toggle | Toggle | Toggle | Toggle |
 	 * |  Mute  |  Video |  Video |  Mute  |
 	 * `-----------------------------------'
@@ -137,7 +137,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		E_M(5),                    E_M(6),                E_M(7),                E_M(8),
 		KC_NO,                     KC_NO,                 KC_NO,                 KC_NO,
 		CK_CLIP,                   LCTL(KC_X),            LCTL(KC_C),            LCTL(KC_V),
-		LCTL(LSFT(KC_M)),          LCTL(LSFT(KC_O)),      LALT(KC_V),            LALT(KC_A)
+		LCTL(KC_D),                LCTL(KC_E),            LALT(KC_V),            LALT(KC_A)
 	),
 	/* Keymap L_TOP: Stience
 	 * ,-----------------------------------.
