@@ -217,6 +217,8 @@ extern const rgblight_segment_t *const *rgblight_layers;
 #        define RGBLIGHT_USE_TIMER
 void rgblight_blink_layer(uint8_t layer, uint16_t duration_ms);
 void rgblight_blink_layer_repeat(uint8_t layer, uint16_t duration_ms, uint8_t times);
+void rgblight_unblink_layer(uint8_t layer);
+void rgblight_unblink_all_but_layer(uint8_t layer);
 #    endif
 
 #endif
