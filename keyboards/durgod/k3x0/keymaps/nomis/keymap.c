@@ -1,4 +1,4 @@
-/* Copyright 2021 Simon Arlott
+/* Copyright 2021-2024 Simon Arlott
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,11 @@ enum custom_keycodes {
 	CK_STRP,
 	CK_STRJ,
 	CK_3_0S,
+	CK_4_0S,
+	CK_5_0S,
 	CK_6_0S,
+	CK_7_0S,
+	CK_8_0S,
 	CK_9_0S,
 };
 
@@ -99,11 +103,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * ,-----------------------------------------------------------.  ,--------------.
 	 * |Reset|  |   |   |   |  |   |   |   |   |   |   |   |   |   |  |    |ScLk|Paus|
 	 * |-----------------------------------------------------------|  |--------------|
-	 * |RcS|Rc1|Rc2|3*0|   |   |6*0|   |   |9*0|   |   |   |       |  |Mcr1|Musi|Vol+|
+	 * |RcS|Rc1|Rc2|3*0|   |   |6*0|   |   |9*0|   |   |   | Sleep |  |Mcr1|Musi|Vol+|
 	 * |-----------------------------------------------------------|  |--------------|
 	 * |     |   |Wak|<E>|   |<T>|<Y>|   |   |   |<P>|   |   |Print|  |Mcr2|Mute|Vol-|
 	 * |------------------------------------------------------.Scan|  `--------------'
-	 * | OSM  |<A>|Slp|   |<F>|   |   |<J>|   |<L>|   |   |   |Rate|
+	 * | OSM  |<A>|   |   |<F>|   |   |<J>|   |<L>|   |   |   |Rate|
 	 * |-----------------------------------------------------------|       ,----.
 	 * |    |Eml|   |   |Cal|   |   |<N>|   |   |   |   |          |       |    |
 	 * |-----------------------------------------------------------|  ,--------------.
@@ -112,9 +116,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 */
 	[L_FUNC] = LAYOUT_tkl_iso(
 		RESET,    _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  KC_SLCK,  KC_PAUS,
-		DM_RSTP,  DM_REC1,  DM_REC2,  CK_3_0S,  _______,  _______,  CK_6_0S,  _______,  _______,  CK_9_0S,  _______,  _______,  _______,  _______,  DM_PLY1,  KC_MSEL,  KC_VOLU,
+		DM_RSTP,  DM_REC1,  DM_REC2,  CK_3_0S,  CK_4_0S,  CK_5_0S,  CK_6_0S,  CK_7_0S,  CK_8_0S,  CK_9_0S,  _______,  _______,  _______,  KC_SLEP,  DM_PLY1,  KC_MSEL,  KC_VOLU,
 		_______,  _______,  KC_WAKE,  CK_STRE,  _______,  CK_STRT,  CK_STRY,  _______,  _______,  _______,  CK_STRP,  _______,  _______,            DM_PLY2,  KC_MUTE,  KC_VOLD,
-		TG(L_OSM),CK_STRA,  KC_SLEP,  _______,  CK_STRF,  _______,  _______,  CK_STRJ,  _______,  CK_STRL,  _______,  _______,  _______,  CK_RATE,
+		TG(L_OSM),CK_STRA,  _______,  _______,  CK_STRF,  _______,  _______,  CK_STRJ,  _______,  CK_STRL,  _______,  _______,  _______,  CK_RATE,
 		_______,  KC_MAIL,  _______,  _______,  KC_CALC,  _______,  _______,  CK_STRN,  _______,  _______,  _______,  _______,            _______,            _______,
 		_______,  _______,  _______,                                _______,                                _______,  KC_APP,   _______,  _______,  KC_MPRV,  _______,  KC_MNXT
 	),
@@ -237,10 +241,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 			break;
 
 		case CK_9_0S:
+		case CK_8_0S:
+		case CK_7_0S:
 		case CK_6_0S:
+		case CK_5_0S:
+		case CK_4_0S:
 		case CK_3_0S:
-			for (uint8_t i = (keycode - CK_3_0S) + 1; i > 0; i--) {
-				SEND_STRING_DELAY("000", 5);
+			for (uint8_t i = (keycode - CK_3_0S) + 3; i > 0; i--) {
+				SEND_STRING_DELAY("0", 5);
 			}
 			return false;
 		}
