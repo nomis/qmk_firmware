@@ -43,7 +43,7 @@ enum custom_keycodes {
 #define MEET_TOG_MIC    LCTL(KC_D)
 #define MEET_TOG_VIDEO  LCTL(KC_E)
 #define MEET_TOG_HAND   LCTL(LALT(KC_H))
-#define ZOOM_TOG_MIC    LALT(KC_A)
+#define TEAMS_TOG_MIC   LCTL(LSFT(KC_M))
 
 #define CLIP_LEFT_CUT     LCTL(KC_X)
 #define CLIP_LEFT_COPY    LCTL(KC_C)
@@ -139,7 +139,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * |Alt Clip|  Cut   |  Copy  | Paste  |
 	 * | Layer  |  C-x   |  C-c   | C-v    |
 	 * |-----------------------------------|
-	 * |  Meet  |  Meet  |  Meet  |  Zoom  |
+	 * |  Meet  |  Meet  |  Meet  | Teams  |
 	 * | Toggle | Toggle | Toggle | Toggle |
 	 * |   Mic  |  Video |  Hand  |   Mic  |
 	 * `-----------------------------------'
@@ -148,9 +148,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		MO(L_LEFT),                MO(L_TOP),             MO(L_BOTTOM),          MO(L_RIGHT),
 		E_M(1),                    E_M(2),                E_M(3),                E_M(4),
 		E_M(5),                    E_M(6),                E_M(7),                E_M(8),
-		KC_NO,                     KC_NO,                 KC_NO,                 KC_NO,
+		KC_NO,                     CK_TEMP3,              CK_TEMP2,              CK_TEMP1,
 		CK_CLIP,                   CLIP_LEFT_CUT,         CLIP_LEFT_COPY,        CLIP_LEFT_PASTE,
-		MEET_TOG_MIC,              MEET_TOG_VIDEO,        MEET_TOG_HAND,         ZOOM_TOG_MIC
+		MEET_TOG_MIC,              MEET_TOG_VIDEO,        MEET_TOG_HAND,         TEAMS_TOG_MIC
 	),
 	/* Keymap L_TOP: Stience
 	 * ,-----------------------------------.
@@ -792,7 +792,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 			led_sethsv(HSV_PURPLE);
 			break;
 
-		case ZOOM_TOG_MIC:
+		case TEAMS_TOG_MIC:
 			led_layers_off();
 			led_sethsv(HSV_LIGHT_BLUE);
 			break;
@@ -860,7 +860,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 		case MEET_TOG_MIC:
 		case MEET_TOG_VIDEO:
 		case MEET_TOG_HAND:
-		case ZOOM_TOG_MIC:
+		case TEAMS_TOG_MIC:
 		case CLIP_LEFT_CUT:
 		case CLIP_LEFT_COPY:
 		case CLIP_LEFT_PASTE:
