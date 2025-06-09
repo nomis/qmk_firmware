@@ -148,7 +148,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		MO(L_LEFT),                MO(L_TOP),             MO(L_BOTTOM),          MO(L_RIGHT),
 		E_M(1),                    E_M(2),                E_M(3),                E_M(4),
 		E_M(5),                    E_M(6),                E_M(7),                E_M(8),
-		KC_NO,                     CK_TEMP3,              CK_TEMP2,              CK_TEMP1,
+		KC_NO,                     _______,               _______,               _______,
 		CK_CLIP,                   CLIP_LEFT_CUT,         CLIP_LEFT_COPY,        CLIP_LEFT_PASTE,
 		MEET_TOG_MIC,              MEET_TOG_VIDEO,        MEET_TOG_HAND,         TEAMS_TOG_MIC
 	),
