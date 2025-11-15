@@ -3,12 +3,12 @@
     "manufacturer": "Yiancar",
     "maintainer": "yiancar",
     "usb": {
-        "vid": "0x8968",
-        "pid": "0x0001",
+        "vid": "0x1209",
+        "pid": "0x0004",
         "device_version": "0.0.1"
     },
     "features": {
-        "bootmagic": false,
+        "bootmagic": true,
         "extrakey": true,
         "mousekey": true,
         "nkro": false
@@ -20,12 +20,12 @@
         }
     },
     "matrix_pins": {
-        "cols": ["B2", "B3", "B1", "F7"],
-        "rows": ["B6"]
+        "cols": ["GP23", "GP20", "GP22", "GP26"],
+        "rows": ["GP21"]
     },
     "diode_direction": "COL2ROW",
-    "processor": "atmega32u4",
-    "bootloader": "caterina",
+    "processor": "RP2040",
+    "bootloader": "rp2040",
     "layouts": {
         "LAYOUT": {
             "layout": [
