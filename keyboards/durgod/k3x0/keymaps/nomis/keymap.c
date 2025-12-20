@@ -40,6 +40,7 @@ enum custom_keycodes {
 	CK_STRT,
 	CK_STRY,
 	CK_STRP,
+	CK_STRM,
 	CK_3_0S,
 	CK_4_0S,
 	CK_5_0S,
@@ -106,9 +107,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * |-----------------------------------------------------------|  |--------------|
 	 * |     |   |Wak|<E>|   |<T>|<Y>|   |   |   |<P>|   |   |Print|  |Mcr2|Mute|Vol-|
 	 * |------------------------------------------------------.Scan|  `--------------'
-	 * | OSM  |<A>|   |   |<F>|   |   |<J>|   |<L>|   |   |   |Rate|
+	 * | OSM  |<A>|   |   |<F>|   |   |   |   |<L>|   |   |   |Rate|
 	 * |-----------------------------------------------------------|       ,----.
-	 * |    |Eml|   |   |Cal|   |   |<N>|   |   |   |   |          |       |    |
+	 * |    |Eml|   |   |Cal|   |   |<N>|<M>|   |   |   |          |       |    |
 	 * |-----------------------------------------------------------|  ,--------------.
 	 * |    |Lock|    |                       |    |App  |Func|    |  |Prev|    |Next|
 	 * `-----------------------------------------------------------'  `--------------'
@@ -118,7 +119,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		DM_RSTP,  DM_REC1,  DM_REC2,  CK_3_0S,  CK_4_0S,  CK_5_0S,  CK_6_0S,  CK_7_0S,  CK_8_0S,  CK_9_0S,  _______,  _______,  _______,  KC_SLEP,  DM_PLY1,  KC_MSEL,  KC_VOLU,
 		_______,  _______,  KC_WAKE,  CK_STRE,  _______,  CK_STRT,  CK_STRY,  _______,  _______,  _______,  CK_STRP,  _______,  _______,            DM_PLY2,  KC_MUTE,  KC_VOLD,
 		TG(L_OSM),CK_STRA,  _______,  _______,  CK_STRF,  _______,  _______,  _______,  _______,  CK_STRL,  _______,  _______,  _______,  CK_RATE,
-		_______,  KC_MAIL,  _______,  _______,  KC_CALC,  _______,  _______,  CK_STRN,  _______,  _______,  _______,  _______,            _______,            _______,
+		_______,  KC_MAIL,  _______,  _______,  KC_CALC,  _______,  _______,  CK_STRN,  CK_STRM,  _______,  _______,  _______,            _______,            _______,
 		_______,  _______,  _______,                                _______,                                _______,  KC_APP,   _______,  _______,  KC_MPRV,  _______,  KC_MNXT
 	),
 #if 0
@@ -233,6 +234,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 		case CK_STRP:
 			SEND_STRING_DELAY(STR_P, 5);
+			break;
+
+		case CK_STRM:
+			SEND_STRING_DELAY(STR_M, 5);
 			break;
 
 		case CK_9_0S:
