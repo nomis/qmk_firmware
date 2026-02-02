@@ -1,4 +1,4 @@
-/* Copyright 2025 Simon Arlott
+/* Copyright 2025-2026 Simon Arlott
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,9 @@
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [0] = LAYOUT( /* Base */
-    //MEET_TOG_MIC, MEET_TOG_VIDEO, MEET_TOG_HAND, TEAMS_TOG_MIC
-    TEAMS_TOG_MIC, MEET_TOG_HAND, MEET_TOG_VIDEO, MEET_TOG_MIC
+    MO(1), MEET_TOG_HAND, MEET_TOG_VIDEO, MEET_TOG_MIC
+  ),
+  [1] = LAYOUT( /* Base */
+    KC_TRNS, KC_MUTE, KC_VOLU, KC_VOLD
   ),
 };
