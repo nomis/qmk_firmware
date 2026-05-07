@@ -22,6 +22,8 @@
 //#include "users/nomis/unicode-input-mode.h"
 #include "strings.c"
 
+static uint32_t strings_id = 0;
+
 enum my_layers {
 	L_BASE,
 	L_OSM,
@@ -205,39 +207,67 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 			return false;
 
 		case CK_STRF:
-			SEND_STRING_DELAY(STR_F, 5);
+			if (strings_id) {
+				SEND_STRING_DELAY(STR_F, 5);
+			}
 			break;
 
 		case CK_STRL:
-			SEND_STRING_DELAY(STR_L, 5);
+			if (strings_id) {
+				SEND_STRING_DELAY(STR_L, 5);
+			}
 			break;
 
 		case CK_STRN:
-			SEND_STRING_DELAY(STR_N, 5);
+			if (strings_id) {
+				SEND_STRING_DELAY(STR_N, 5);
+			}
 			break;
 
 		case CK_STRE:
-			SEND_STRING_DELAY(STR_E, 5);
+			if (strings_id == 1) {
+				SEND_STRING_DELAY(STR_E_1, 5);
+			} else if (strings_id == 2) {
+				SEND_STRING_DELAY(STR_E_2, 5);
+			}
 			break;
 
 		case CK_STRA:
-			SEND_STRING_DELAY(STR_A, 5);
+			if (strings_id == 1) {
+				SEND_STRING_DELAY(STR_A_1, 5);
+			} else if (strings_id == 2) {
+				SEND_STRING_DELAY(STR_A_2, 5);
+			}
 			break;
 
 		case CK_STRT:
-			SEND_STRING_DELAY(STR_T, 5);
+			if (strings_id == 1) {
+				SEND_STRING_DELAY(STR_T_1, 5);
+			} else if (strings_id == 2) {
+				SEND_STRING_DELAY(STR_T_2, 5);
+			}
 			break;
 
 		case CK_STRY:
-			SEND_STRING_DELAY(STR_Y, 5);
+			if (strings_id == 1) {
+				SEND_STRING_DELAY(STR_Y_1, 5);
+			} else if (strings_id == 2) {
+				SEND_STRING_DELAY(STR_Y_2, 5);
+			}
 			break;
 
 		case CK_STRP:
-			SEND_STRING_DELAY(STR_P, 5);
+			if (strings_id == 1) {
+				SEND_STRING_DELAY(STR_P_1, 5);
+			} else if (strings_id == 2) {
+				SEND_STRING_DELAY(STR_P_2, 5);
+			}
 			break;
 
 		case CK_STRM:
-			SEND_STRING_DELAY(STR_M, 5);
+			if (strings_id == 1) {
+				SEND_STRING_DELAY(STR_M, 5);
+			}
 			break;
 
 		case CK_9_0S:
@@ -280,6 +310,18 @@ static void raw_identify_user(enum raw_identify id) {
 	set_os(id);
 }
 
+static void select_strings(uint32_t id) {
+	strings_id = id;
+}
+
 void raw_hid_receive(uint8_t *data, uint8_t length) {
 	raw_hid_receive_identify(data, length);
+
+	if (length > 2) {
+		if (data[0] == 0x00 && data[1] == 0x02) { /* Select strings */
+			if (length >= 6) {
+				select_strings(((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16) | ((uint32_t)data[4] << 8) | data[5]);
+			}
+		}
+	}
 }
