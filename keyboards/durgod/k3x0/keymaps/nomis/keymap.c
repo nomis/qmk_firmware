@@ -1,4 +1,4 @@
-/* Copyright 2021-2024 Simon Arlott
+/* Copyright 2021-2026 Simon Arlott
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,19 +107,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	 * |-----------------------------------------------------------|  |--------------|
 	 * |     |   |Wak|<E>|   |<T>|<Y>|   |   |   |<P>|   |   |Print|  |Mcr2|Mute|Vol-|
 	 * |------------------------------------------------------.Scan|  `--------------'
-	 * | OSM  |<A>|   |   |<F>|   |   |   |   |<L>|   |   |   |Rate|
+	 * | OSM  |<A>|MyC|Eml|<F>|   |   |   |   |<L>|   |   |   |Rate|
 	 * |-----------------------------------------------------------|       ,----.
-	 * |    |Eml|   |   |Cal|   |   |<N>|<M>|   |   |   |          |       |    |
+	 * |    |   |   |   |Cal|   |   |<N>|<M>|   |   |   |          |       |    |
 	 * |-----------------------------------------------------------|  ,--------------.
-	 * |    |Lock|    |                       |    |App  |Func|    |  |Prev|    |Next|
+	 * |    |    |    |                       |    |App  |Func|    |  |Prev|    |Next|
 	 * `-----------------------------------------------------------'  `--------------'
 	 */
 	[L_FUNC] = LAYOUT_tkl_iso(
 		RESET,    KC_F13,   KC_F14,   KC_F15,   KC_F16,   KC_F17,   KC_F18,   KC_F19,   KC_F20,   KC_F21,   KC_F22,   KC_F23,   KC_F24,             _______,  KC_SLCK,  KC_PAUS,
 		DM_RSTP,  DM_REC1,  DM_REC2,  CK_3_0S,  CK_4_0S,  CK_5_0S,  CK_6_0S,  CK_7_0S,  CK_8_0S,  CK_9_0S,  _______,  _______,  _______,  KC_SLEP,  DM_PLY1,  KC_MSEL,  KC_VOLU,
 		_______,  _______,  KC_WAKE,  CK_STRE,  _______,  CK_STRT,  CK_STRY,  _______,  _______,  _______,  CK_STRP,  _______,  _______,            DM_PLY2,  KC_MUTE,  KC_VOLD,
-		TG(L_OSM),CK_STRA,  _______,  _______,  CK_STRF,  _______,  _______,  _______,  _______,  CK_STRL,  _______,  _______,  _______,  CK_RATE,
-		_______,  KC_MAIL,  _______,  _______,  KC_CALC,  _______,  _______,  CK_STRN,  CK_STRM,  _______,  _______,  _______,            _______,            _______,
+		TG(L_OSM),CK_STRA,  KC_MYCM,  KC_MAIL,  CK_STRF,  _______,  _______,  _______,  _______,  CK_STRL,  _______,  _______,  _______,  CK_RATE,
+		_______,  _______,  _______,  _______,  KC_CALC,  _______,  _______,  CK_STRN,  CK_STRM,  _______,  _______,  _______,            _______,            _______,
 		_______,  _______,  _______,                                _______,                                _______,  KC_APP,   _______,  _______,  KC_MPRV,  _______,  KC_MNXT
 	),
 #if 0
